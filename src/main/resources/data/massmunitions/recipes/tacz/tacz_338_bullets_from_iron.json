@@ -1,0 +1,33 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "tacz"
+        }
+      ],
+      "recipe": {
+        "type": "create:compacting",
+        "heatRequirement": "heated",
+        "ingredients": [
+          {
+            "count": 2,
+            "tag": "forge:ingots/iron"
+          },
+          {
+            "count": 3,
+            "tag": "forge:nuggets/copper"
+          }
+        ],
+        "results": [
+          {
+            "count": 3,
+            "item": "massmunitions:338_bullet"
+          }
+        ]
+      }
+    }
+  ]
+}

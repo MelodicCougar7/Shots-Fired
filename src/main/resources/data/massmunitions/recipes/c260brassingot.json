@@ -1,0 +1,20 @@
+{
+  "type": "create:mixing",
+  "heatRequirement": "heated",
+  "ingredients": [
+    {
+      "count": 3,
+      "tag": "forge:ingots/copper"
+    },
+    {
+      "count": 1,
+      "tag": "forge:ingots/zinc"
+    }
+  ],
+  "results": [
+    {
+      "count": 4,
+      "item": "massmunitions:c260_ingot"
+    }
+  ]
+}

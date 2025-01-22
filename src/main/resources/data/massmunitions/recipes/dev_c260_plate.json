@@ -1,0 +1,15 @@
+{
+  "type": "create:compacting",
+  "ingredients": [
+    {
+      "count": 1,
+      "item": "massmunitions:c260_ingot"
+    }
+  ],
+  "results": [
+    {
+      "count": 2,
+      "item": "massmunitions:c260_plate"
+    }
+  ]
+}

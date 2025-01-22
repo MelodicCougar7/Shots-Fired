@@ -1,0 +1,23 @@
+{
+  "type": "create:mixing",
+  "ingredients": [
+    {
+      "count": 3,
+      "item": "minecraft:bonemeal"
+    },
+    {
+      "count": 3,
+      "item": "minecraft:iron_nugget"
+    },
+    {
+      "count": 1,
+      "item": "create:copper_sheet"
+    }
+  ],
+  "results": [
+    {
+      "count": 9,
+      "item": "massmunitions:45acp_bullet"
+    }
+  ]
+}

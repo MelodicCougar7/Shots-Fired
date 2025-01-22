@@ -1,0 +1,32 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "tacz"
+        }
+      ],
+      "recipe": {
+        "type": "create:compacting",
+        "ingredients": [
+          {
+            "count": 3,
+            "tag": "forge:nuggets/iron"
+          },
+          {
+            "count": 1,
+            "tag": "create:copper_sheet"
+          }
+        ],
+        "results": [
+          {
+            "count": 9,
+            "item": "massmunitions:45acp_bullet"
+          }
+        ]
+      }
+    }
+  ]
+}

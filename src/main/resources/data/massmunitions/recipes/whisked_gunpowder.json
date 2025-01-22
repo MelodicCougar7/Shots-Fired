@@ -1,0 +1,14 @@
+{
+  "type": "create:mixing",
+  "ingredients": [
+    {
+      "item": "minecraft:gunpowder"
+    }
+  ],
+  "results": [
+    {
+      "amount": 125,
+      "fluid": "massmunitions:whisked_gunpowder_fluid"
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "type": "create:sequenced_assembly",
+  "ingredient": {
+    "item": "massmunitions:c260_coil"
+  },
+  "loops": 6,
+  "results": [
+    {
+      "count": 12,
+      "chance": 100.0,
+      "item": "massmunitions:c260_sheet"
+    }
+  ],
+  "sequence": [
+    {
+      "type":  "create:cutting",
+      "ingredients":  [
+        {
+          "item":  "massmunitions:c260_coil"
+        }
+      ],
+      "results": [
+        {
+          "item": "massmunitions:c260_coil"
+        }
+      ]
+    },
+    {
+      "type":  "create:pressing",
+      "ingredients":  [
+        {
+          "item":  "massmunitions:c260_coil"
+        }
+      ],
+      "results": [
+        {
+          "item": "massmunitions:c260_coil"
+        }
+      ]
+    }
+  ],
+  "transitionalItem": {
+    "item": "massmunitions:c260_coil"
+  }
+}

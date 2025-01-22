@@ -1,0 +1,33 @@
+{
+  "type": "forge:conditional",
+  "recipes": [
+    {
+      "conditions": [
+        {
+          "type": "forge:mod_loaded",
+          "modid": "tacz"
+        }
+      ],
+      "recipe": {
+        "type": "create:compacting",
+        "heatRequirement": "heated",
+        "ingredients": [
+          {
+            "count": 4,
+            "tag": "forge:ingots/iron"
+          },
+          {
+            "count": 9,
+            "tag": "forge:ingots/copper"
+          }
+        ],
+        "results": [
+          {
+            "count": 6,
+            "item": "massmunitions:50bmg_bullet"
+          }
+        ]
+      }
+    }
+  ]
+}
