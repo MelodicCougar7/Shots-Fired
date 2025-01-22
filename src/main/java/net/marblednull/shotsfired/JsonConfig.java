@@ -24,7 +24,7 @@ public class JsonConfig {
     public static HashMap<String, Item> CONFIG_MAP = new HashMap<>();
 
     public static HashMap<String, Item> readConfig() throws IOException {
-        File file = DIR.resolve("massmunitions.json").toFile();
+        File file = DIR.resolve("shotsfired.json").toFile();
         if(file.exists()) {
             FileReader reader = new FileReader(file);
             List<String> stringList = GSON.fromJson(reader, List.class);
@@ -49,12 +49,12 @@ public class JsonConfig {
     }
 
     public static void checkConfig() throws IOException {
-        File file = DIR.resolve("massmunitions.json").toFile();
+        File file = DIR.resolve("shotsfired.json").toFile();
         if(!file.exists()) {
             FileWriter writer = new FileWriter(file);
             JsonArray strArr = new JsonArray();
-            strArr.add("tacz:glock_17|massmunitions:556x45_casing");
-            strArr.add("tacz:cz75|massmunitions:50bmg_casing");
+            strArr.add("tacz:glock_17|minecraft:apple");
+            strArr.add("tacz:cz75|minecraft:apple");
             System.out.println("JSON CONFIG GEN = " + GSON.toJson(strArr));
             writer.write(GSON.toJson(strArr));
             writer.close();
