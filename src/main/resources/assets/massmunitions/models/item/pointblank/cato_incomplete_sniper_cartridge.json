@@ -1,6 +1,0 @@
-{
-  "parent": "minecraft:item/generated",
-  "textures": {
-    "layer0": "massmunitions:item/cato_incomplete_sniper_cartridge"
-  }
-}

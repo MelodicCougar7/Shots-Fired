@@ -3,40 +3,40 @@ loaderVersion="${loader_version_range}"
 license="Apache-2.0 License"
 
 [[mods]]
-modId="massmunitions"
+modId="shotsfired"
 version="1.20.1-1.0.0"
-displayName="Create: Mass Munitions"
+displayName="Shots Fired"
 displayURL="test1 / test2"
-logoFile="cmm_logo.png"
-credits="MarbledNull, MelodicCougar7, Corrine"
+logoFile="sf_logo.png"
+credits="MarbledNull, MelodicCougar7, Corrinedev"
 authors="MarbledNull, MelodicCougar7"
 
-description='''A mod that adds mass production compatibility between Create and TaCZ/VPB'''
-[[dependencies.massmunitions]]
+description='''A mod that adds empty casings when you shoot a gun from TaCZ, and eventually any other gun mod with 3d models.'''
+[[dependencies.shotsfired]]
     modId="forge"
     mandatory=true
     versionRange="${forge_version_range}"
     ordering="NONE"
     side="BOTH"
-[[dependencies.massmunitions]]
+[[dependencies.shotsfired]]
     modId="minecraft"
     mandatory=true
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
-[[dependencies.massmunitions]]
+[[dependencies.shotsfired]]
     modId="create"
-    mandatory=true
+    mandatory=false
     versionRange="0.5.1.h,"
     ordering="NONE"
     side="BOTH"
-[[dependencies.massmunitions]]
+[[dependencies.shotsfired]]
     modId="pointblank"
     mandatory=false
     versionRange="1.7.6,"
     ordering="NONE"
     side="BOTH"
-[[dependencies.massmunitions]]
+[[dependencies.shotsfired]]
     modId="tacz"
     mandatory=false
     versionRange="1.0.3,"
