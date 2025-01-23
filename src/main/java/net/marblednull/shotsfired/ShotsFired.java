@@ -30,6 +30,7 @@ public class ShotsFired {
         //Registering the JSON based Config
         try {
             JsonConfig.checkConfig();
+            JsonBurstConfig.checkConfig();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -22,6 +22,17 @@ public class ModEvents {
         return JsonConfig.CONFIG_MAP;
     }
 
+    public static HashMap<String, Integer> parseBurstConfig() {
+        if(JsonBurstConfig.CONFIG_MAP.isEmpty()) {
+            try {
+                JsonBurstConfig.CONFIG_MAP = JsonBurstConfig.readConfig();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return JsonBurstConfig.CONFIG_MAP;
+    }
+
     //help from and credit to Leducklet/Corrineduck and ChatGPT smh
 
      public static void weaponShootEvent(com.tacz.guns.api.event.common.GunShootEvent gunEvent) {
@@ -40,7 +51,7 @@ public class ModEvents {
                 ItemStack casingStack = new ItemStack(gunItem);
 
                 if (gunEvent.getShooter().getMainHandItem().getTag().getString("GunFireMode").equals("BURST")) {
-                    HashMap<String, Integer> gunBurstMap = JsonBurstConfig.CONFIG_MAP;
+                    HashMap<String, Integer> gunBurstMap = parseBurstConfig();
                     if (gunBurstMap.containsKey(gunId)) {
                         int burstCount = gunBurstMap.getOrDefault(gunId, 1);
                         //burst fire mode spawning two casings
