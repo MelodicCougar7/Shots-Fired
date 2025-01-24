@@ -98,7 +98,7 @@ public class ModEvents {
                     Vec3 lookDirection = gunEvent.getShooter().getLookAngle();
 
                     //define casing velocity/speed
-                    double velocity = 0.35;
+                    double velocity = 0.275;
                     //define whether ejection is on left or not, since all values will eventually be a config this matters little
                     boolean isLeft = true;
                     //get value of where palayer is looking for automatically adjusting casing trajectory
