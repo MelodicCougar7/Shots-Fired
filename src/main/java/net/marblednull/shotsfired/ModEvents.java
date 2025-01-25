@@ -75,23 +75,25 @@ public class ModEvents {
                             HashMap<String, Object> casingEjectionMap = parseEjectionConfig();
 
                             if (casingEjectionMap.containsKey(gunId)) {
+
+                                HashMap<String, Object> gunConfig = (HashMap<String, Object>) casingEjectionMap.get(gunId);
                                 //define casing velocity/speed
-                                double velocity = (double) casingEjectionMap.getOrDefault("casingVelocity", 0.2);
+                                double velocity = (double) gunConfig.get("casingVelocity");
 
                                 //define whether ejection is on right or not. Default value is true
-                                boolean isRight = (int) casingEjectionMap.getOrDefault("isRight", 1) == 1; //converting from int to boolean
+                                boolean isRight = (int) gunConfig.get("isRight") == 1; //converting from int to boolean
 
                                 //define side to side eject
-                                double rotationAngle = (double) casingEjectionMap.getOrDefault("rotationAngle", 85);
+                                double rotationAngle = (double) gunConfig.get("rotationAngle");
 
                                 // define arc of casing eject
-                                double verticalScalingFactor = (double) casingEjectionMap.getOrDefault("verticalScalingFactor", 1.0);
+                                double verticalScalingFactor = (double) gunConfig.get("verticalScalingFactor");
 
                                 //adjust y position of casing spawn, from player Eye Height
-                                double verticalOffset = (double) casingEjectionMap.getOrDefault("verticalOffset", -0.25); //positive for above, negative for below. AFAIK measured in minecraft block coordinates.
+                                double verticalOffset = (double) gunConfig.get("verticalOffset"); //positive for above, negative for below. AFAIK measured in minecraft block coordinates.
 
                                 //definte side offset to the left or right of the player
-                                double sideOffsetDistance = (double) casingEjectionMap.getOrDefault("sideOffsetDistance", 0.15);
+                                double sideOffsetDistance = (double) gunConfig.get("sideOffsetDistance");
 
                                 //NOT A CONFIG OPTION, USED IN CALCULATIONS
                                 double pitchAngle = gunEvent.getShooter().getXRot();
