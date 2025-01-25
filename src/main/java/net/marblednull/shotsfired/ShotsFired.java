@@ -27,6 +27,7 @@ public class ShotsFired {
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.addListener(ModEvents::weaponShootEvent);
+        JsonEjectionConfig.register();
         //Registering the JSON based Config
         try {
             JsonConfig.checkConfig();

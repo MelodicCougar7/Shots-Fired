@@ -8,6 +8,9 @@ import org.joml.Vector3d;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class ModEvents {
     // from corrine, config parser
@@ -33,16 +36,6 @@ public class ModEvents {
         return JsonBurstConfig.CONFIG_MAP;
     }
 
-    public static HashMap<String, Object> parseEjectionConfig() {
-        if (JsonBurstConfig.CONFIG_MAP.isEmpty()) {
-            try {
-                JsonBurstConfig.CONFIG_MAP = JsonBurstConfig.readConfig();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-        return JsonEjectionConfig.CONFIG_MAP;
-    }
 
     //help from and credit to Leducklet/Corrineduck and ChatGPT smh
 
@@ -72,28 +65,29 @@ public class ModEvents {
                             Vec3 lookDirection = gunEvent.getShooter().getLookAngle();
 
                             //CONFIGURABLE VALUES
-                            HashMap<String, Object> casingEjectionMap = parseEjectionConfig();
+                                JsonEjectionConfig.EJECTION_MAP.get();
 
-                            if (casingEjectionMap.containsKey(gunId)) {
+                                LinkedHashMap<String, JsonEjectionConfig.EjectionInfo> ejectionConfigMap = JsonEjectionConfig.EJECTION_MAP.get();
 
-                                HashMap<String, Object> gunConfig = (HashMap<String, Object>) casingEjectionMap.get(gunId);
+                                JsonEjectionConfig.EjectionInfo ejectionInfo = ejectionConfigMap.get(gunId);
+
                                 //define casing velocity/speed
-                                double velocity = (double) gunConfig.get("casingVelocity");
+                                double velocity = ejectionInfo.casingVelocity();
 
                                 //define whether ejection is on right or not. Default value is true
-                                boolean isRight = (int) gunConfig.get("isRight") == 1; //converting from int to boolean
+                                boolean isRight = ejectionInfo.isRight();
 
                                 //define side to side eject
-                                double rotationAngle = (double) gunConfig.get("rotationAngle");
+                                double rotationAngle = ejectionInfo.rotationAngle();
 
                                 // define arc of casing eject
-                                double verticalScalingFactor = (double) gunConfig.get("verticalScalingFactor");
+                                double verticalScalingFactor = ejectionInfo.verticalScalingFactor();
 
                                 //adjust y position of casing spawn, from player Eye Height
-                                double verticalOffset = (double) gunConfig.get("verticalOffset"); //positive for above, negative for below. AFAIK measured in minecraft block coordinates.
+                                double verticalOffset = ejectionInfo.verticalOffset();
 
-                                //definte side offset to the left or right of the player
-                                double sideOffsetDistance = (double) gunConfig.get("sideOffsetDistance");
+                                //define side offset to the left or right of the player
+                                double sideOffsetDistance = ejectionInfo.sideOffsetDistance();
 
                                 //NOT A CONFIG OPTION, USED IN CALCULATIONS
                                 double pitchAngle = gunEvent.getShooter().getXRot();
@@ -120,7 +114,7 @@ public class ModEvents {
                                 casing.setPickUpDelay(20);
                                 //Add casing
                                 gunEvent.getShooter().level().addFreshEntity(casing);
-                            }
+
                         }
                     }
                 } else {
