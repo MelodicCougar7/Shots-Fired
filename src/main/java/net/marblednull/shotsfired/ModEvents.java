@@ -33,6 +33,17 @@ public class ModEvents {
         return JsonBurstConfig.CONFIG_MAP;
     }
 
+    public static HashMap<String, Object> parseEjectionConfig() {
+        if (JsonBurstConfig.CONFIG_MAP.isEmpty()) {
+            try {
+                JsonBurstConfig.CONFIG_MAP = JsonBurstConfig.readConfig();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return JsonEjectionConfig.CONFIG_MAP;
+    }
+
     //help from and credit to Leducklet/Corrineduck and ChatGPT smh
 
     public static void weaponShootEvent(com.tacz.guns.api.event.common.GunShootEvent gunEvent) {
@@ -56,34 +67,58 @@ public class ModEvents {
                         int burstCount = gunBurstMap.getOrDefault(gunId, 1);
                         //burst fire mode spawning two casings, main difference between this and below code and will eventually swap for handler method once I learn how to properly create one
                         for (int i = 0; i < burstCount; i++) {
-                            //Create casing entity
-                            // now testing changes with velocity
+                            //Create casing entity with velocity
+
                             Vec3 lookDirection = gunEvent.getShooter().getLookAngle();
 
-                            double velocity = 0.2;
-                            //define casing velocity/speed
-                            boolean isLeft = true;
-                            //define whether ejection is on left or not, since all values will eventually be a config this matters little
-                            double pitchAngle = gunEvent.getShooter().getXRot();
-                            //define side to side eject
-                            double rotationAngle = 85.0;
-                            //define arc of casing eject
-                            double verticalScalingFactor = 1.0;
+                            //CONFIGURABLE VALUES
+                            HashMap<String, Object> casingEjectionMap = parseEjectionConfig();
 
-                            //Rotate 90 degrees from the look direction
-                            Vector3d offsetDirection = rotateDirection(lookDirection, rotationAngle, isLeft, pitchAngle, verticalScalingFactor);
+                            if (casingEjectionMap.containsKey(gunId)) {
+                                //define casing velocity/speed
+                                double velocity = (double) casingEjectionMap.getOrDefault("casingVelocity", 0.2);
 
-                            // end velocity tests
-                            //original casing entity creation below
-                            //ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY(), gunEvent.getShooter().getZ(), casingStack.copy());
-                            // begin velocity tests
-                            ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY() + gunEvent.getShooter().getEyeHeight(), gunEvent.getShooter().getZ(), casingStack.copy());
+                                //define whether ejection is on right or not. Default value is true
+                                boolean isRight = (int) casingEjectionMap.getOrDefault("isRight", 1) == 1; //converting from int to boolean
 
-                            casing.setDeltaMovement(offsetDirection.x * velocity, offsetDirection.y * velocity, offsetDirection.z * velocity);
+                                //define side to side eject
+                                double rotationAngle = (double) casingEjectionMap.getOrDefault("rotationAngle", 85);
 
-                            casing.setPickUpDelay(20);
-                            //Add casing
-                            gunEvent.getShooter().level().addFreshEntity(casing);
+                                // define arc of casing eject
+                                double verticalScalingFactor = (double) casingEjectionMap.getOrDefault("verticalScalingFactor", 1.0);
+
+                                //adjust y position of casing spawn, from player Eye Height
+                                double verticalOffset = (double) casingEjectionMap.getOrDefault("verticalOffset", -0.25); //positive for above, negative for below. AFAIK measured in minecraft block coordinates.
+
+                                //definte side offset to the left or right of the player
+                                double sideOffsetDistance = (double) casingEjectionMap.getOrDefault("sideOffsetDistance", 0.15);
+
+                                //NOT A CONFIG OPTION, USED IN CALCULATIONS
+                                double pitchAngle = gunEvent.getShooter().getXRot();
+
+                                // CALCULATIONS, NOT VARIABLES, NO NEED FOR CHANGE
+
+                                //DO NOT CHANGE - modify casing y position based on  player's eye height
+                                double offsetY = gunEvent.getShooter().getEyeHeight();
+                                //DO NOT CHANGE - add values of above 2
+                                double adjustedY = offsetY + verticalOffset;
+                                //DO NOT CHANGE - calculate spawn position based on isRight and sideOffsetDistance
+                                Vector3d sideOffset = calculateSideOffset(lookDirection, isRight, sideOffsetDistance);
+
+                                //Rotate 90 degrees from the look direction
+                                Vector3d offsetDirection = rotateDirection(lookDirection, rotationAngle, isRight, pitchAngle, verticalScalingFactor);
+
+                                //original casing entity creation below
+                                //ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY(), gunEvent.getShooter().getZ(), casingStack.copy());
+
+                                ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY() + adjustedY, gunEvent.getShooter().getZ(), casingStack.copy());
+
+                                casing.setDeltaMovement(offsetDirection.x * velocity, offsetDirection.y * velocity, offsetDirection.z * velocity);
+
+                                casing.setPickUpDelay(20);
+                                //Add casing
+                                gunEvent.getShooter().level().addFreshEntity(casing);
+                            }
                         }
                     }
                 } else {
@@ -107,6 +142,7 @@ public class ModEvents {
                     double rotationAngle = 85.0;
                     //define arc of casing eject
                     double verticalScalingFactor = 1.0;
+
 
                     //Rotate 90 degrees from the look direction
                     Vector3d offsetDirection = rotateDirection(lookDirection, rotationAngle, isLeft, pitchAngle, verticalScalingFactor);
@@ -155,4 +191,25 @@ public class ModEvents {
         // Return the rotated direction with the adjusted Y component
         return new Vector3d(offsetX, offsetY, offsetZ);
     }
+    private static Vector3d calculateSideOffset(Vec3 direction, boolean isLeft, double distance) {
+        // Calculate a perpendicular vector to the look direction
+        // Rotate the vector 90 degrees around the Y-axis
+        double offsetX, offsetZ;
+
+        if (isLeft) {
+            // Rotate counterclockwise (left)
+            offsetX = -direction.z();  // Inverse of Z to get left direction
+            offsetZ = direction.x();   // X is used as the Z component for left
+        } else {
+            // Rotate clockwise (right)
+            offsetX = direction.z();   // Z is used as X component for right
+            offsetZ = -direction.x();  // Inverse of X to get right direction
+        }
+
+        // Scale the perpendicular direction by the distance you want to offset
+        offsetX *= distance;
+        offsetZ *= distance;
+
+        return new Vector3d(offsetX, 0, offsetZ);  // No change in Y, just horizontal movement
     }
+}
