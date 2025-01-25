@@ -5,6 +5,8 @@ import com.corrinedev.jsconf.api.ConfigValue;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+//this is a test message to trigger a webhook
+
 /// new config rebuilt by MC7 on Corrine's JSConf and previous snippets from Corrine
 public class JsonEjectionConfig {
     public static final Config EJECTION_CONFIG =  new Config("shotsfired-ejection-config");
