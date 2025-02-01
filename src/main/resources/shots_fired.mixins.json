@@ -1,0 +1,15 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "net.marblednull.shotsfired.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "shots_fired.refmap.json",
+  "mixins": [
+    "CasingMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
