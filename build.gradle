@@ -85,6 +85,11 @@ dependencies {
     compileOnly(fg.deobf("mezz.jei:jei-1.20.1-forge-api:15.19.5.99"))
     runtimeOnly(fg.deobf("mezz.jei:jei-1.20.1-forge:15.19.5.99"))
 }
+mixin {
+    // MixinGradle Settings
+    add sourceSets.main, 'shots_fired.refmap.json'
+    config 'shots_fired.mixins.json'
+}
 
 tasks.named('processResources', ProcessResources).configure {
     var replaceProperties = [
