@@ -3,8 +3,11 @@ package net.marblednull.shotsfired;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
-
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.io.File;
 import java.io.FileReader;
@@ -14,47 +17,44 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 
-/// Because we couldn't get the Forge Config to work for the life of us
-/// Tweaked by MC7 and ChatGPT for burst fire.
-public class JsonBurstConfig {
+public class VPBConfig {
+
     public static final Path DIR = FMLPaths.CONFIGDIR.get();
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    public static HashMap<String, Integer> CONFIG_MAP = new HashMap<>();
+    public static HashMap<String, Item> CONFIG_MAP = new HashMap<>();
 
-    public static HashMap<String, Integer> readConfig() throws IOException {
-        File file = DIR.resolve("shotsfiredburst.json").toFile();
+    public static HashMap<String, Item> readConfig() throws IOException {
+        File file = DIR.resolve("shotsfired_vpb.json").toFile();
         if(file.exists()) {
             FileReader reader = new FileReader(file);
             List<String> stringList = GSON.fromJson(reader, List.class);
-            HashMap<String, Integer> map = new HashMap<>();
+            HashMap<String, Item> map = new HashMap<>();
 
             for (String strToParse : stringList) {
                 String gunId;
-               Integer value;
+                String itemId;
                 String[] strs = strToParse.split("\\|");
                 gunId = strs[0];
-                try {
-                    value = Integer.parseInt(strs[1]); // Parse the integer value
-                } catch (NumberFormatException e) {
-                    value = 0; // Default value in case of parsing error
-                }
-                map.put(gunId, value);
+                itemId = strs[1];
+                Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemId));
+                if(item == Items.AIR) return new HashMap<>();
+                map.put(gunId, item);
             }
 
             return map;
         } else {
             checkConfig();
-            return new HashMap<String, Integer>();
+            return new HashMap<String, Item>();
         }
     }
 
     public static void checkConfig() throws IOException {
-        File file = DIR.resolve("shotsfiredburst.json").toFile();
+        File file = DIR.resolve("shotsfired.json").toFile();
         if(!file.exists()) {
             FileWriter writer = new FileWriter(file);
             JsonArray strArr = new JsonArray();
-            strArr.add("tacz:hk_mp5a5|3");
-            strArr.add("tacz:scar_l|3");
+            strArr.add("tacz:glock_17|minecraft:apple");
+            strArr.add("tacz:cz75|minecraft:apple");
             System.out.println("JSON CONFIG GEN = " + GSON.toJson(strArr));
             writer.write(GSON.toJson(strArr));
             writer.close();

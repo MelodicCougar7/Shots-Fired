@@ -27,11 +27,11 @@ public class ShotsFired {
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.addListener(ModEvents::weaponShootEvent);
-        JsonEjectionConfig.register();
+        TACZEjectionConfig.register();
         //Registering the JSON based Config
         try {
-            JsonConfig.checkConfig();
-            JsonBurstConfig.checkConfig();
+            TACZConfig.checkConfig();
+            TACZBurstConfig.checkConfig();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

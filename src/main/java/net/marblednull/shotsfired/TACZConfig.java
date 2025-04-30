@@ -3,11 +3,13 @@ package net.marblednull.shotsfired;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.FileReader;
@@ -19,13 +21,15 @@ import java.util.List;
 
 /// Because we couldn't get the Forge Config to work for the life of us
 
-public class JsonConfig {
+public class TACZConfig {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     public static final Path DIR = FMLPaths.CONFIGDIR.get();
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     public static HashMap<String, Item> CONFIG_MAP = new HashMap<>();
 
     public static HashMap<String, Item> readConfig() throws IOException {
-        File file = DIR.resolve("shotsfired.json").toFile();
+        File file = DIR.resolve("shotsfired_tacz.json").toFile();
         if(file.exists()) {
             FileReader reader = new FileReader(file);
             List<String> stringList = GSON.fromJson(reader, List.class);
@@ -50,13 +54,14 @@ public class JsonConfig {
     }
 
     public static void checkConfig() throws IOException {
-        File file = DIR.resolve("shotsfired.json").toFile();
+        File file = DIR.resolve("shotsfired_tacz.json").toFile();
         if(!file.exists()) {
             FileWriter writer = new FileWriter(file);
             JsonArray strArr = new JsonArray();
             strArr.add("tacz:glock_17|minecraft:apple");
             strArr.add("tacz:cz75|minecraft:apple");
-            System.out.println("JSON CONFIG GEN = " + GSON.toJson(strArr));
+            strArr.add("tacz:hk_mp5a5|minecraft:gold_ingot");
+            LOGGER.info("JSON CONFIG GEN = " + GSON.toJson(strArr)); // we'll see how much this generates in the logs
             writer.write(GSON.toJson(strArr));
             writer.close();
         }

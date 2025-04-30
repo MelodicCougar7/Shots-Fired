@@ -1,10 +1,13 @@
 package net.marblednull.shotsfired;
 
+import com.google.gson.Gson;
+import com.mojang.logging.LogUtils;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -13,99 +16,138 @@ import java.util.Map;
 import java.util.Objects;
 
 public class ModEvents {
+    // logger
+    private static final Logger LOGGER = LogUtils.getLogger();
     // from corrine, config parser
     public static HashMap<String, Item> parseConfig() {
-        if (JsonConfig.CONFIG_MAP.isEmpty()) {
+        if (TACZConfig.CONFIG_MAP.isEmpty()) {
             try {
-                JsonConfig.CONFIG_MAP = JsonConfig.readConfig();
+                TACZConfig.CONFIG_MAP = TACZConfig.readConfig();
             } catch (IOException e) {
+                LOGGER.info("IOException when parsing TACZ Config.");
                 throw new RuntimeException(e);
             }
         }
-        return JsonConfig.CONFIG_MAP;
+        LOGGER.info("Success when parsing TACZ Config.");
+        return TACZConfig.CONFIG_MAP;
     }
 
     public static HashMap<String, Integer> parseBurstConfig() {
-        if (JsonBurstConfig.CONFIG_MAP.isEmpty()) {
+        if (TACZBurstConfig.CONFIG_MAP.isEmpty()) {
             try {
-                JsonBurstConfig.CONFIG_MAP = JsonBurstConfig.readConfig();
+                TACZBurstConfig.CONFIG_MAP = TACZBurstConfig.readConfig();
             } catch (IOException e) {
+                LOGGER.info("IOException when parsing TACZ Burst map.");
                 throw new RuntimeException(e);
             }
         }
-        return JsonBurstConfig.CONFIG_MAP;
+        LOGGER.info("Success when parsing TACZ Burst map.");
+        return TACZBurstConfig.CONFIG_MAP;
     }
-
 
     //help from and credit to Leducklet/Corrineduck and ChatGPT smh
 
     public static void weaponShootEvent(com.tacz.guns.api.event.common.GunShootEvent gunEvent) {
 
         if (gunEvent.getLogicalSide().isServer()) {
-            HashMap<String, Item> gunItemMap = parseConfig();
+            LOGGER.info("If 1.");
+            HashMap<String, Item> gunItemMap = parseConfig(); // check here next I suppose
 
             // Get the GunId from the event
-            String gunId = gunEvent.getGunItemStack().getTag().getString("GunId");
+            String gunId = Objects.requireNonNull(gunEvent.getGunItemStack().getTag()).getString("GunId");
+            LOGGER.info("GunId: {}", gunId);
 
             // Check if the GunId exists in the map
             if (gunItemMap.containsKey(gunId)) {
+                LOGGER.info("If 2.");
                 // Get the item associated with the GunId
-                Item gunItem = gunItemMap.get(gunId);
-                // create new itemstack from the retrieved GunId
-                ItemStack casingStack = new ItemStack(gunItem);
 
-                if (gunEvent.getShooter().getMainHandItem().getTag().getString("GunFireMode").equals("BURST")) {
+                Item casingItem = gunItemMap.get(gunId);
+                LOGGER.info("Retrieving casing item for GunId: {}. Item is {}", gunId, casingItem);
+                // create new itemstack from the retrieved GunId and casing item
+                ItemStack casingStack = new ItemStack(casingItem);
+
+                // ===========================================================
+                // If it does exist in the map, load the data from the config.
+                // ===========================================================
+
+                Vec3 lookDirection = gunEvent.getShooter().getLookAngle();
+
+                //CONFIGURABLE VALUES
+                // TACZEjectionConfig.EJECTION_MAP.get(); // returns same thing as below, the entire map
+                //LOGGER.info("Got ejection map from ejection config: {}", TACZEjectionConfig.EJECTION_MAP.get());
+
+                LinkedHashMap<String, TACZEjectionConfig.EjectionInfo> ejectionConfigMap = TACZEjectionConfig.EJECTION_MAP.get(); // returns same as above, the entire map
+
+                //LOGGER.info("Got ejectionConfigMap: {}", ejectionConfigMap);
+
+                //LOGGER.info("Attempting to separate out GunId: {}", gunId);
+
+
+                //TACZEjectionConfig.EjectionInfo ejectionInfo = ejectionConfigMap.get(gunId);
+
+                Object obj = ejectionConfigMap.get(gunId);
+                TACZEjectionConfig.EjectionInfo ejectionInfo;
+
+                if (obj instanceof TACZEjectionConfig.EjectionInfo ei) {
+                    ejectionInfo = ei;
+                } else if (obj instanceof Map<?, ?> mapObj) {
+                    // Manually re-parse it using Gson to get proper EjectionInfo
+                    Gson gson = new Gson();
+                    ejectionInfo = gson.fromJson(gson.toJson(mapObj), TACZEjectionConfig.EjectionInfo.class);
+                    LOGGER.warn("Converted LinkedTreeMap to EjectionInfo for gunId '{}'", gunId);
+                } else {
+                    // Fallback default
+                    LOGGER.warn("Invalid or missing ejection data for '{}', using default.", gunId);
+                    ejectionInfo = new TACZEjectionConfig.EjectionInfo(0.3, true, 90.0, 0.3, 0.1, 0.1);
+                }
+
+                LOGGER.info("Deserialized EjectionInfo, based on the passed gunId: {}", ejectionInfo);
+                //define casing velocity/speed
+                double velocity = ejectionInfo.casingVelocity();
+
+                //define whether ejection is on right or not. Default value is true
+                boolean isRight = ejectionInfo.isRight();
+
+                //define side to side eject
+                double rotationAngle = ejectionInfo.rotationAngle();
+
+                // define arc of casing eject
+                double verticalScalingFactor = ejectionInfo.verticalScalingFactor();
+
+                //adjust y position of casing spawn, from player Eye Height
+                double verticalOffset = ejectionInfo.verticalOffset();
+
+                //define side offset to the left or right of the player
+                double sideOffsetDistance = ejectionInfo.sideOffsetDistance();
+
+                //NOT A CONFIG OPTION, USED IN CALCULATIONS
+                double pitchAngle = gunEvent.getShooter().getXRot();
+
+                // CALCULATIONS, NOT VARIABLES, NO NEED FOR CHANGE
+
+                //DO NOT CHANGE - modify casing y position based on  player's eye height
+                double offsetY = gunEvent.getShooter().getEyeHeight();
+                //DO NOT CHANGE - add values of above 2
+                double adjustedY = offsetY + verticalOffset;
+                //DO NOT CHANGE - calculate spawn position based on isRight and sideOffsetDistance
+                Vector3d sideOffset = calculateSideOffset(lookDirection, isRight, sideOffsetDistance);
+
+                //Rotate 90 degrees from the look direction
+                Vector3d offsetDirection = rotateDirection(lookDirection, rotationAngle, isRight, pitchAngle, verticalScalingFactor);
+                LOGGER.info("Success obtaining velocity values from code?");
+                // burst code
+                if (Objects.requireNonNull(gunEvent.getShooter().getMainHandItem().getTag()).getString("GunFireMode").equals("BURST")) {
+                    // determine how many burst shots there are for this gun id
+                    LOGGER.info("If 3");
                     HashMap<String, Integer> gunBurstMap = parseBurstConfig();
                     if (gunBurstMap.containsKey(gunId)) {
+                        LOGGER.info("If 4");
                         int burstCount = gunBurstMap.getOrDefault(gunId, 1);
                         //burst fire mode spawning two casings, main difference between this and below code and will eventually swap for handler method once I learn how to properly create one
+                        LOGGER.info("Attempting burst");
                         for (int i = 0; i < burstCount; i++) {
                             //Create casing entity with velocity
-
-                            Vec3 lookDirection = gunEvent.getShooter().getLookAngle();
-
-                            //CONFIGURABLE VALUES
-                                JsonEjectionConfig.EJECTION_MAP.get();
-
-                                LinkedHashMap<String, JsonEjectionConfig.EjectionInfo> ejectionConfigMap = JsonEjectionConfig.EJECTION_MAP.get();
-
-                                JsonEjectionConfig.EjectionInfo ejectionInfo = ejectionConfigMap.get(gunId);
-
-                                //define casing velocity/speed
-                                double velocity = ejectionInfo.casingVelocity();
-
-                                //define whether ejection is on right or not. Default value is true
-                                boolean isRight = ejectionInfo.isRight();
-
-                                //define side to side eject
-                                double rotationAngle = ejectionInfo.rotationAngle();
-
-                                // define arc of casing eject
-                                double verticalScalingFactor = ejectionInfo.verticalScalingFactor();
-
-                                //adjust y position of casing spawn, from player Eye Height
-                                double verticalOffset = ejectionInfo.verticalOffset();
-
-                                //define side offset to the left or right of the player
-                                double sideOffsetDistance = ejectionInfo.sideOffsetDistance();
-
-                                //NOT A CONFIG OPTION, USED IN CALCULATIONS
-                                double pitchAngle = gunEvent.getShooter().getXRot();
-
-                                // CALCULATIONS, NOT VARIABLES, NO NEED FOR CHANGE
-
-                                //DO NOT CHANGE - modify casing y position based on  player's eye height
-                                double offsetY = gunEvent.getShooter().getEyeHeight();
-                                //DO NOT CHANGE - add values of above 2
-                                double adjustedY = offsetY + verticalOffset;
-                                //DO NOT CHANGE - calculate spawn position based on isRight and sideOffsetDistance
-                                Vector3d sideOffset = calculateSideOffset(lookDirection, isRight, sideOffsetDistance);
-
-                                //Rotate 90 degrees from the look direction
-                                Vector3d offsetDirection = rotateDirection(lookDirection, rotationAngle, isRight, pitchAngle, verticalScalingFactor);
-
-                                //original casing entity creation below
-                                //ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY(), gunEvent.getShooter().getZ(), casingStack.copy());
 
                                 ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY() + adjustedY, gunEvent.getShooter().getZ(), casingStack.copy());
 
@@ -117,36 +159,8 @@ public class ModEvents {
 
                         }
                     }
-                } else {
-                   //ORIGINAL CODE, COMMENTED OUT DURING TESTING
-                    //Create casing entity
-                   // ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY(), gunEvent.getShooter().getZ(), casingStack.copy());
-                    //casing.setPickUpDelay(20);
-                    //Add casing
-                    //gunEvent.getShooter().level().addFreshEntity(casing);
-                    //Create casing entity
-                    // now testing changes with velocity
-                    Vec3 lookDirection = gunEvent.getShooter().getLookAngle();
-
-                    //define casing velocity/speed
-                    double velocity = 0.275;
-                    //define whether ejection is on left or not, since all values will eventually be a config this matters little
-                    boolean isLeft = true;
-                    //get value of where palayer is looking for automatically adjusting casing trajectory
-                    double pitchAngle = gunEvent.getShooter().getXRot();
-                    //define side to side eject
-                    double rotationAngle = 85.0;
-                    //define arc of casing eject
-                    double verticalScalingFactor = 1.0;
-
-
-                    //Rotate 90 degrees from the look direction
-                    Vector3d offsetDirection = rotateDirection(lookDirection, rotationAngle, isLeft, pitchAngle, verticalScalingFactor);
-
-                    // end velocity tests
-                    //original casing entity creation below
-                    //ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY(), gunEvent.getShooter().getZ(), casingStack.copy());
-                    // begin velocity tests
+                } else { // ie, not burst. Auto, semi, or single shot
+                    LOGGER.info("Attempting shot");
                     ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY() + gunEvent.getShooter().getEyeHeight(), gunEvent.getShooter().getZ(), casingStack.copy());
 
                     casing.setDeltaMovement(offsetDirection.x * velocity, offsetDirection.y * velocity, offsetDirection.z * velocity);
@@ -156,9 +170,13 @@ public class ModEvents {
                     gunEvent.getShooter().level().addFreshEntity(casing);
                 }
             }
+            else {
+            LOGGER.warn("GunID not found in gunItemMap: {}. gunItemMap: {}", gunId, gunItemMap);
+            }
         }
     }
 
+    // Vector3d helper methods for velocity code
     private static Vector3d rotateDirection(Vec3 direction, double angleDegrees, boolean isLeft, double pitchAngle, double verticalScalingFactor) {
         // Convert angle to radians (since Java trigonometric functions use radians)
         double angleRadians = Math.toRadians(angleDegrees);
