@@ -1,5 +1,6 @@
 package net.marblednull.shotsfired;
 
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -10,8 +11,11 @@ import java.io.IOException;
 import java.util.HashMap;
 
 public class ModEvents {
+
+    private static final RandomSource randomBulletChance = RandomSource.create();
+
     // from corrine, config parser
-    public static HashMap<String, Item> parseConfig() {
+    public static HashMap<String, DropData> parseConfig() {
         if (JsonConfig.CONFIG_MAP.isEmpty()) {
             try {
                 JsonConfig.CONFIG_MAP = JsonConfig.readConfig();
@@ -38,7 +42,7 @@ public class ModEvents {
     public static void weaponShootEvent(com.tacz.guns.api.event.common.GunShootEvent gunEvent) {
 
         if (gunEvent.getLogicalSide().isServer()) {
-            HashMap<String, Item> gunItemMap = parseConfig();
+            HashMap<String, DropData> gunItemMap = parseConfig();
 
             // Get the GunId from the event
             String gunId = gunEvent.getGunItemStack().getTag().getString("GunId");
@@ -46,9 +50,15 @@ public class ModEvents {
             // Check if the GunId exists in the map
             if (gunItemMap.containsKey(gunId)) {
                 // Get the item associated with the GunId
-                Item gunItem = gunItemMap.get(gunId);
+                Item gunItem = gunItemMap.get(gunId).item;
                 // create new itemstack from the retrieved GunId
                 ItemStack casingStack = new ItemStack(gunItem);
+                // The chance the item will drop from the gun
+                float dropChance = gunItemMap.get(gunId).chance;
+
+                double shootingHeight = gunEvent.getShooter().getY() + gunEvent.getShooter().getEyeHeight() / 1.3;
+                // Offset the bullet spawning position, we don't want the bullet blocking player vision in first person
+                double offsetSize = 0.75f;
 
                 if (gunEvent.getShooter().getMainHandItem().getTag().getString("GunFireMode").equals("BURST")) {
                     HashMap<String, Integer> gunBurstMap = parseBurstConfig();
@@ -57,6 +67,11 @@ public class ModEvents {
                         //burst fire mode spawning two casings, main difference between this and below code and will eventually swap for handler method once I learn how to properly create one
                         for (int i = 0; i < burstCount; i++) {
                             //Create casing entity
+
+                            if (dropChance < randomBulletChance.nextFloat() * 100) {
+                                continue;
+                            }
+
                             // now testing changes with velocity
                             Vec3 lookDirection = gunEvent.getShooter().getLookAngle();
 
@@ -77,7 +92,7 @@ public class ModEvents {
                             //original casing entity creation below
                             //ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY(), gunEvent.getShooter().getZ(), casingStack.copy());
                             // begin velocity tests
-                            ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY() + gunEvent.getShooter().getEyeHeight(), gunEvent.getShooter().getZ(), casingStack.copy());
+                            ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX() + offsetDirection.x * offsetSize, shootingHeight, gunEvent.getShooter().getZ() + offsetDirection.z * offsetSize, casingStack.copy());
 
                             casing.setDeltaMovement(offsetDirection.x * velocity, offsetDirection.y * velocity, offsetDirection.z * velocity);
 
@@ -89,12 +104,18 @@ public class ModEvents {
                 } else {
                    //ORIGINAL CODE, COMMENTED OUT DURING TESTING
                     //Create casing entity
-                   // ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY(), gunEvent.getShooter().getZ(), casingStack.copy());
+
+                    // ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY(), gunEvent.getShooter().getZ(), casingStack.copy());
                     //casing.setPickUpDelay(20);
                     //Add casing
                     //gunEvent.getShooter().level().addFreshEntity(casing);
                     //Create casing entity
                     // now testing changes with velocity
+
+                    if (dropChance < randomBulletChance.nextFloat() * 100) {
+                        return;
+                    }
+
                     Vec3 lookDirection = gunEvent.getShooter().getLookAngle();
 
                     //define casing velocity/speed
@@ -115,7 +136,7 @@ public class ModEvents {
                     //original casing entity creation below
                     //ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY(), gunEvent.getShooter().getZ(), casingStack.copy());
                     // begin velocity tests
-                    ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY() + gunEvent.getShooter().getEyeHeight(), gunEvent.getShooter().getZ(), casingStack.copy());
+                    ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX() + offsetDirection.x * offsetSize, shootingHeight, gunEvent.getShooter().getZ() + offsetDirection.z * offsetSize, casingStack.copy());
 
                     casing.setDeltaMovement(offsetDirection.x * velocity, offsetDirection.y * velocity, offsetDirection.z * velocity);
 
