@@ -9,6 +9,9 @@ import org.joml.Vector3d;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Objects;
 
 public class ModEvents {
 
@@ -36,6 +39,7 @@ public class ModEvents {
         }
         return JsonBurstConfig.CONFIG_MAP;
     }
+
 
     //help from and credit to Leducklet/Corrineduck and ChatGPT smh
 
@@ -66,39 +70,68 @@ public class ModEvents {
                         int burstCount = gunBurstMap.getOrDefault(gunId, 1);
                         //burst fire mode spawning two casings, main difference between this and below code and will eventually swap for handler method once I learn how to properly create one
                         for (int i = 0; i < burstCount; i++) {
+
                             //Create casing entity
 
                             if (dropChance < randomBulletChance.nextFloat() * 100) {
                                 continue;
                             }
+                               //Create casing entity with velocity
 
-                            // now testing changes with velocity
                             Vec3 lookDirection = gunEvent.getShooter().getLookAngle();
 
-                            double velocity = 0.2;
-                            //define casing velocity/speed
-                            boolean isLeft = true;
-                            //define whether ejection is on left or not, since all values will eventually be a config this matters little
-                            double pitchAngle = gunEvent.getShooter().getXRot();
-                            //define side to side eject
-                            double rotationAngle = 85.0;
-                            //define arc of casing eject
-                            double verticalScalingFactor = 1.0;
+                            //CONFIGURABLE VALUES
+                                JsonEjectionConfig.EJECTION_MAP.get();
 
-                            //Rotate 90 degrees from the look direction
-                            Vector3d offsetDirection = rotateDirection(lookDirection, rotationAngle, isLeft, pitchAngle, verticalScalingFactor);
+                                LinkedHashMap<String, JsonEjectionConfig.EjectionInfo> ejectionConfigMap = JsonEjectionConfig.EJECTION_MAP.get();
 
-                            // end velocity tests
-                            //original casing entity creation below
-                            //ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY(), gunEvent.getShooter().getZ(), casingStack.copy());
-                            // begin velocity tests
-                            ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX() + offsetDirection.x * offsetSize, shootingHeight, gunEvent.getShooter().getZ() + offsetDirection.z * offsetSize, casingStack.copy());
+                                JsonEjectionConfig.EjectionInfo ejectionInfo = ejectionConfigMap.get(gunId);
 
-                            casing.setDeltaMovement(offsetDirection.x * velocity, offsetDirection.y * velocity, offsetDirection.z * velocity);
+                                //define casing velocity/speed
+                                double velocity = ejectionInfo.casingVelocity();
 
-                            casing.setPickUpDelay(20);
-                            //Add casing
-                            gunEvent.getShooter().level().addFreshEntity(casing);
+                                //define whether ejection is on right or not. Default value is true
+                                boolean isRight = ejectionInfo.isRight();
+
+                                //define side to side eject
+                                double rotationAngle = ejectionInfo.rotationAngle();
+
+                                // define arc of casing eject
+                                double verticalScalingFactor = ejectionInfo.verticalScalingFactor();
+
+                                //adjust y position of casing spawn, from player Eye Height
+                                double verticalOffset = ejectionInfo.verticalOffset();
+
+                                //define side offset to the left or right of the player
+                                double sideOffsetDistance = ejectionInfo.sideOffsetDistance();
+
+                                //NOT A CONFIG OPTION, USED IN CALCULATIONS
+                                double pitchAngle = gunEvent.getShooter().getXRot();
+
+                                // CALCULATIONS, NOT VARIABLES, NO NEED FOR CHANGE
+
+                                //DO NOT CHANGE - modify casing y position based on  player's eye height
+                                double offsetY = gunEvent.getShooter().getEyeHeight();
+                                //DO NOT CHANGE - add values of above 2
+                                double adjustedY = offsetY + verticalOffset;
+                                //DO NOT CHANGE - calculate spawn position based on isRight and sideOffsetDistance
+                                Vector3d sideOffset = calculateSideOffset(lookDirection, isRight, sideOffsetDistance);
+
+                                //Rotate 90 degrees from the look direction
+                                Vector3d offsetDirection = rotateDirection(lookDirection, rotationAngle, isRight, pitchAngle, verticalScalingFactor);
+
+                                //original casing entity creation below
+                                //ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY(), gunEvent.getShooter().getZ(), casingStack.copy());
+
+                                ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY() + adjustedY, gunEvent.getShooter().getZ(), casingStack.copy());
+
+                                casing.setDeltaMovement(offsetDirection.x * velocity, offsetDirection.y * velocity, offsetDirection.z * velocity);
+
+                                casing.setPickUpDelay(20);
+                                //Add casing
+                                gunEvent.getShooter().level().addFreshEntity(casing);
+                            
+  
                         }
                     }
                 } else {
@@ -128,6 +161,7 @@ public class ModEvents {
                     double rotationAngle = 85.0;
                     //define arc of casing eject
                     double verticalScalingFactor = 1.0;
+
 
                     //Rotate 90 degrees from the look direction
                     Vector3d offsetDirection = rotateDirection(lookDirection, rotationAngle, isLeft, pitchAngle, verticalScalingFactor);
@@ -176,4 +210,25 @@ public class ModEvents {
         // Return the rotated direction with the adjusted Y component
         return new Vector3d(offsetX, offsetY, offsetZ);
     }
+    private static Vector3d calculateSideOffset(Vec3 direction, boolean isLeft, double distance) {
+        // Calculate a perpendicular vector to the look direction
+        // Rotate the vector 90 degrees around the Y-axis
+        double offsetX, offsetZ;
+
+        if (isLeft) {
+            // Rotate counterclockwise (left)
+            offsetX = -direction.z();  // Inverse of Z to get left direction
+            offsetZ = direction.x();   // X is used as the Z component for left
+        } else {
+            // Rotate clockwise (right)
+            offsetX = direction.z();   // Z is used as X component for right
+            offsetZ = -direction.x();  // Inverse of X to get right direction
+        }
+
+        // Scale the perpendicular direction by the distance you want to offset
+        offsetX *= distance;
+        offsetZ *= distance;
+
+        return new Vector3d(offsetX, 0, offsetZ);  // No change in Y, just horizontal movement
     }
+}

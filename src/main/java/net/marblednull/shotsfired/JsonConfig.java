@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 
 /// Because we couldn't get the Forge Config to work for the life of us
+
 public class JsonConfig {
     public static final Path DIR = FMLPaths.CONFIGDIR.get();
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
