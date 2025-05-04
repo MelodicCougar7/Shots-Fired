@@ -121,11 +121,12 @@ public class ModEvents {
                 //define side offset to the left or right of the player
                 double sideOffsetDistance = ejectionInfo.sideOffsetDistance();
 
-                //NOT A CONFIG OPTION, USED IN CALCULATIONS
-                double pitchAngle = gunEvent.getShooter().getXRot();
+               double forwardOffsetDistance = 10;
 
                 // CALCULATIONS, NOT VARIABLES, NO NEED FOR CHANGE
 
+                //NOT A CONFIG OPTION, USED IN CALCULATIONS
+                double pitchAngle = gunEvent.getShooter().getXRot();
                 //DO NOT CHANGE - modify casing y position based on  player's eye height
                 double offsetY = gunEvent.getShooter().getEyeHeight();
                 //DO NOT CHANGE - add values of above 2
@@ -149,7 +150,7 @@ public class ModEvents {
                         for (int i = 0; i < burstCount; i++) {
                             //Create casing entity with velocity
 
-                                ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY() + adjustedY, gunEvent.getShooter().getZ(), casingStack.copy());
+                                ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX() + forwardOffsetDistance, gunEvent.getShooter().getY() + adjustedY, gunEvent.getShooter().getZ() + sideOffset.z, casingStack.copy());
 
                                 casing.setDeltaMovement(offsetDirection.x * velocity, offsetDirection.y * velocity, offsetDirection.z * velocity);
 
