@@ -22,30 +22,40 @@ import java.util.List;
 public class JsonConfig {
     public static final Path DIR = FMLPaths.CONFIGDIR.get();
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    public static HashMap<String, Item> CONFIG_MAP = new HashMap<>();
 
-    public static HashMap<String, Item> readConfig() throws IOException {
+    public static HashMap<String, DropData> CONFIG_MAP = new HashMap<>();
+
+    public static HashMap<String, DropData> readConfig() throws IOException {
         File file = DIR.resolve("shotsfired.json").toFile();
         if(file.exists()) {
             FileReader reader = new FileReader(file);
             List<String> stringList = GSON.fromJson(reader, List.class);
-            HashMap<String, Item> map = new HashMap<>();
+            HashMap<String, DropData> map = new HashMap<>();
 
             for (String strToParse : stringList) {
                 String gunId;
                 String itemId;
+                float itemChance = 100;
                 String[] strs = strToParse.split("\\|");
+
                 gunId = strs[0];
                 itemId = strs[1];
                 Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemId));
-                if(item == Items.AIR) return new HashMap<>();
-                map.put(gunId, item);
+
+                if(item == Items.AIR) {
+                    continue;
+                }
+                if (strs.length > 2) {
+                    itemChance = Float.parseFloat(strs[2]);
+                }
+
+                map.put(gunId, new DropData(item, itemChance));
             }
 
             return map;
         } else {
             checkConfig();
-            return new HashMap<String, Item>();
+            return new HashMap<String, DropData>();
         }
     }
 
