@@ -15,6 +15,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/// Main class to handle the casing creation event under weaponShootEvent()
+
 public class ModEvents {
     private static final Logger LOGGER = LogUtils.getLogger();
 
@@ -26,9 +28,12 @@ public class ModEvents {
             try {
                 JsonConfig.CONFIG_MAP = JsonConfig.readConfig();
             } catch (IOException e) {
+                LOGGER.error("IOException when parsing TACZ Config.");
                 throw new RuntimeException(e);
             }
         }
+        // TEMPORARY LOGGING STATEMENT
+        LOGGER.info("Success when parsing TACZ Config.");
         return JsonConfig.CONFIG_MAP;
     }
 
@@ -36,10 +41,13 @@ public class ModEvents {
         if (JsonBurstConfig.CONFIG_MAP.isEmpty()) {
             try {
                 JsonBurstConfig.CONFIG_MAP = JsonBurstConfig.readConfig();
+                LOGGER.error("IOException when parsing TACZ Burst map.");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
+        // TEMPORARY LOGGING STATEMENT
+        LOGGER.info("Success when parsing TACZ Burst map.");
         return JsonBurstConfig.CONFIG_MAP;
     }
 
@@ -47,7 +55,8 @@ public class ModEvents {
     //help from and credit to Leducklet/Corrineduck and ChatGPT smh
 
     public static void weaponShootEvent(com.tacz.guns.api.event.common.GunShootEvent gunEvent) {
-
+        // TEMPORARY LOGGING STATEMENT
+        LOGGER.warn("weaponShootEvent called");
         if (gunEvent.getLogicalSide().isServer()) {
             HashMap<String, DropData> gunItemMap = parseConfig();
 

@@ -3,11 +3,13 @@ package net.marblednull.shotsfired;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
+import com.mojang.logging.LogUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.FileReader;
@@ -20,6 +22,8 @@ import java.util.List;
 /// Because we couldn't get the Forge Config to work for the life of us
 
 public class JsonConfig {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     public static final Path DIR = FMLPaths.CONFIGDIR.get();
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
@@ -30,7 +34,10 @@ public class JsonConfig {
         if(file.exists()) {
             FileReader reader = new FileReader(file);
             List<String> stringList = GSON.fromJson(reader, List.class);
+            LOGGER.info("Attempting to make a new HashMap for String, DropData");
             HashMap<String, DropData> map = new HashMap<>();
+
+            LOGGER.info("Creating new HashMap for String, DropData");
 
             for (String strToParse : stringList) {
                 String gunId;
@@ -60,6 +67,7 @@ public class JsonConfig {
     }
 
     public static void checkConfig() throws IOException {
+        LOGGER.info("Checking TACZ config."); // TEMPORARY LOGGING STATEMENT
         File file = DIR.resolve("shotsfired.json").toFile();
         if(!file.exists()) {
             FileWriter writer = new FileWriter(file);

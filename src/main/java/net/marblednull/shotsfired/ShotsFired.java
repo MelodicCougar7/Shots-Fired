@@ -22,11 +22,13 @@ public class ShotsFired {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public ShotsFired() {
+        LOGGER.info("Shots Fired initializing.");
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.addListener(ModEvents::weaponShootEvent);
+        LOGGER.info("Passed by the register for weaponShootEvent");
         JsonEjectionConfig.register();
         //Registering the JSON based Config
         try {
