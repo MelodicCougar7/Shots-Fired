@@ -1,11 +1,13 @@
 package net.marblednull.shotsfired;
 
+import com.mojang.logging.LogUtils;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3d;
+import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -14,6 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class ModEvents {
+    private static final Logger LOGGER = LogUtils.getLogger();
 
     private static final RandomSource randomBulletChance = RandomSource.create();
 
@@ -64,15 +67,20 @@ public class ModEvents {
                 // Offset the bullet spawning position, we don't want the bullet blocking player vision in first person
                 double offsetSize = 0.75f;
 
+                int shotCount = 1; // default value. Is overridden by the burst config as necessary
+
                 if (gunEvent.getShooter().getMainHandItem().getTag().getString("GunFireMode").equals("BURST")) {
                     HashMap<String, Integer> gunBurstMap = parseBurstConfig();
                     if (gunBurstMap.containsKey(gunId)) {
-                        int burstCount = gunBurstMap.getOrDefault(gunId, 1);
+                        shotCount = gunBurstMap.getOrDefault(gunId, 1); // redundant but protects against incomplete configs
+                    }
                         //burst fire mode spawning two casings, main difference between this and below code and will eventually swap for handler method once I learn how to properly create one
-                        for (int i = 0; i < burstCount; i++) {
+                    for (int i = 0; i < shotCount; i++) {
+                        LOGGER.warn("Attempting shot.");
 
                             //Create casing entity
 
+                            // Allow casing creation if this is true. This is a for loop, it will trigger on each passed shot, NOT groups, like burst.
                             if (dropChance < randomBulletChance.nextFloat() * 100) {
                                 continue;
                             }
@@ -134,53 +142,10 @@ public class ModEvents {
   
                         }
                     }
-                } else {
-                   //ORIGINAL CODE, COMMENTED OUT DURING TESTING
-                    //Create casing entity
-
-                    // ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY(), gunEvent.getShooter().getZ(), casingStack.copy());
-                    //casing.setPickUpDelay(20);
-                    //Add casing
-                    //gunEvent.getShooter().level().addFreshEntity(casing);
-                    //Create casing entity
-                    // now testing changes with velocity
-
-                    if (dropChance < randomBulletChance.nextFloat() * 100) {
-                        return;
-                    }
-
-                    Vec3 lookDirection = gunEvent.getShooter().getLookAngle();
-
-                    //define casing velocity/speed
-                    double velocity = 0.275;
-                    //define whether ejection is on left or not, since all values will eventually be a config this matters little
-                    boolean isLeft = true;
-                    //get value of where palayer is looking for automatically adjusting casing trajectory
-                    double pitchAngle = gunEvent.getShooter().getXRot();
-                    //define side to side eject
-                    double rotationAngle = 85.0;
-                    //define arc of casing eject
-                    double verticalScalingFactor = 1.0;
-
-
-                    //Rotate 90 degrees from the look direction
-                    Vector3d offsetDirection = rotateDirection(lookDirection, rotationAngle, isLeft, pitchAngle, verticalScalingFactor);
-
-                    // end velocity tests
-                    //original casing entity creation below
-                    //ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY(), gunEvent.getShooter().getZ(), casingStack.copy());
-                    // begin velocity tests
-                    ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX() + offsetDirection.x * offsetSize, shootingHeight, gunEvent.getShooter().getZ() + offsetDirection.z * offsetSize, casingStack.copy());
-
-                    casing.setDeltaMovement(offsetDirection.x * velocity, offsetDirection.y * velocity, offsetDirection.z * velocity);
-
-                    casing.setPickUpDelay(20);
-                    //Add casing
-                    gunEvent.getShooter().level().addFreshEntity(casing);
                 }
             }
         }
-    }
+
 
     private static Vector3d rotateDirection(Vec3 direction, double angleDegrees, boolean isLeft, double pitchAngle, double verticalScalingFactor) {
         // Convert angle to radians (since Java trigonometric functions use radians)

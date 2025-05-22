@@ -64,8 +64,8 @@ public class JsonConfig {
         if(!file.exists()) {
             FileWriter writer = new FileWriter(file);
             JsonArray strArr = new JsonArray();
-            strArr.add("tacz:glock_17|minecraft:apple");
-            strArr.add("tacz:cz75|minecraft:apple");
+            strArr.add("tacz:glock_17|minecraft:apple|100");
+            strArr.add("tacz:cz75|minecraft:apple|100");
             System.out.println("JSON CONFIG GEN = " + GSON.toJson(strArr));
             writer.write(GSON.toJson(strArr));
             writer.close();
