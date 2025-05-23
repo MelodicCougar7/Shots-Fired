@@ -37,10 +37,10 @@ public class ModEvents {
         return TACZConfig.CONFIG_MAP;
     }
 
-    public static HashMap<String, Integer> parseBurstConfig() {
-        if (JsonBurstConfig.CONFIG_MAP.isEmpty()) {
+    public static HashMap<String, BurstData> parseBurstConfig() {
+        if (TACZBurstConfig.CONFIG_MAP.isEmpty()) {
             try {
-                JsonBurstConfig.CONFIG_MAP = JsonBurstConfig.readConfig();
+                TACZBurstConfig.CONFIG_MAP = TACZBurstConfig.readConfig();
                 LOGGER.error("IOException when parsing TACZ Burst map.");
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -48,7 +48,7 @@ public class ModEvents {
         }
         // TEMPORARY LOGGING STATEMENT
         LOGGER.info("Success when parsing TACZ Burst map.");
-        return JsonBurstConfig.CONFIG_MAP;
+        return TACZBurstConfig.CONFIG_MAP;
     }
 
 
@@ -75,11 +75,13 @@ public class ModEvents {
                 LOGGER.warn("Retrieving casing item for GunId: {}. Item is {}", gunId, casingItem);
 
                 int shotCount = 1; // default value. Is overridden by the burst config as necessary
+                BurstData LocalBurstInfo = new BurstData(1, 0.15); // default value. Is overridden by the config as necessary.
 
                 if (gunEvent.getShooter().getMainHandItem().getTag().getString("GunFireMode").equals("BURST")) {
-                    HashMap<String, Integer> gunBurstMap = parseBurstConfig();
+                    HashMap<String, BurstData> gunBurstMap = parseBurstConfig();
                     if (gunBurstMap.containsKey(gunId)) {
-                        shotCount = gunBurstMap.getOrDefault(gunId, 1); // redundant but protects against incomplete configs
+                        LocalBurstInfo = gunBurstMap.get(gunId); // redundant but protects against incomplete configs
+                        shotCount = LocalBurstInfo.shotCount;
                     }
                         //burst fire mode spawning two casings, main difference between this and below code and will eventually swap for handler method once I learn how to properly create one
 
@@ -176,14 +178,19 @@ public class ModEvents {
                     //Add casing
                     gunEvent.getShooter().level().addFreshEntity(casing);
 
-
+                    // wait a specified amount of time
+                    try {
+                        Thread.sleep((long)(LocalBurstInfo.delay * 1000)); // Convert seconds to ms
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
                 }
                 } // end of gunItemMap and gunId check
             }
         }
 
 
-    private static Vector3d rotateDirection(Vec3 direction, double angleDegrees, boolean isLeft, double pitchAngle, double verticalScalingFactor) {
+    public static Vector3d rotateDirection(Vec3 direction, double angleDegrees, boolean isLeft, double pitchAngle, double verticalScalingFactor) {
         // Convert angle to radians (since Java trigonometric functions use radians)
         double angleRadians = Math.toRadians(angleDegrees);
         double pitchRadians = Math.toRadians(pitchAngle); // Convert pitch to radians

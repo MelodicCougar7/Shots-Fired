@@ -16,40 +16,42 @@ import java.util.List;
 
 /// Because we couldn't get the Forge Config to work for the life of us
 /// Tweaked by MC7 and ChatGPT for burst fire.
-public class JsonBurstConfig {
+/// BurstData system inspired by Quanz's chance PR.
+public class VPBBurstConfig {
     public static final Path DIR = FMLPaths.CONFIGDIR.get();
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-    public static HashMap<String, Integer> CONFIG_MAP = new HashMap<>();
+    public static HashMap<String, BurstData> CONFIG_MAP = new HashMap<>();
 
-    public static HashMap<String, Integer> readConfig() throws IOException {
-        File file = DIR.resolve("shotsfiredburst.json").toFile();
+    public static HashMap<String, BurstData> readConfig() throws IOException {
+        File file = DIR.resolve("shotsfired-vpb-burst.json").toFile();
         if(file.exists()) {
             FileReader reader = new FileReader(file);
             List<String> stringList = GSON.fromJson(reader, List.class);
-            HashMap<String, Integer> map = new HashMap<>();
+            HashMap<String, BurstData> map = new HashMap<>();
 
             for (String strToParse : stringList) {
                 String gunId;
-               Integer value;
+                Integer shotCount;
+                double delay = 0.1;
                 String[] strs = strToParse.split("\\|");
                 gunId = strs[0];
                 try {
-                    value = Integer.parseInt(strs[1]); // Parse the integer value
+                    shotCount = Integer.parseInt(strs[1]); // Parse the integer value
                 } catch (NumberFormatException e) {
-                    value = 0; // Default value in case of parsing error
+                    shotCount = 0; // Default value in case of parsing error
                 }
-                map.put(gunId, value);
+                map.put(gunId, new BurstData(shotCount, delay));
             }
 
             return map;
         } else {
             checkConfig();
-            return new HashMap<String, Integer>();
+            return new HashMap<String, BurstData>();
         }
     }
 
     public static void checkConfig() throws IOException {
-        File file = DIR.resolve("shotsfiredburst.json").toFile();
+        File file = DIR.resolve("shotsfired-vpb-burst.json").toFile();
         if(!file.exists()) {
             FileWriter writer = new FileWriter(file);
             JsonArray strArr = new JsonArray();

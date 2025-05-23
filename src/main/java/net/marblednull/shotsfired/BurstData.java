@@ -1,12 +1,10 @@
 package net.marblednull.shotsfired;
 
-import net.minecraft.world.item.Item;
-
 public class BurstData {
-    public Item item;
-    public float delay;
-    public BurstData(Item item, float delay) {
-        this.item = item;
+    public int shotCount;
+    public double delay;
+    public BurstData(int shotCount, double delay) {
+        this.shotCount = shotCount;
         this.delay = delay;
     }
 }

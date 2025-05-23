@@ -43,7 +43,7 @@ public class ShotsFired {
             TACZEjectionConfig.register();
             try {
                 TACZConfig.checkConfig();
-                JsonBurstConfig.checkConfig();
+                TACZBurstConfig.checkConfig();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
