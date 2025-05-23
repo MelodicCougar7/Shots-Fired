@@ -21,7 +21,7 @@ import java.util.List;
 
 /// Because we couldn't get the Forge Config to work for the life of us
 
-public class JsonConfig {
+public class TACZConfig {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public static final Path DIR = FMLPaths.CONFIGDIR.get();
@@ -30,7 +30,7 @@ public class JsonConfig {
     public static HashMap<String, DropData> CONFIG_MAP = new HashMap<>();
 
     public static HashMap<String, DropData> readConfig() throws IOException {
-        File file = DIR.resolve("shotsfired.json").toFile();
+        File file = DIR.resolve("shotsfired-tacz-config.json").toFile();
         if(file.exists()) {
             FileReader reader = new FileReader(file);
             List<String> stringList = GSON.fromJson(reader, List.class);
@@ -68,13 +68,14 @@ public class JsonConfig {
 
     public static void checkConfig() throws IOException {
         LOGGER.info("Checking TACZ config."); // TEMPORARY LOGGING STATEMENT
-        File file = DIR.resolve("shotsfired.json").toFile();
+        File file = DIR.resolve("shotsfired-tacz-config.json").toFile();
         if(!file.exists()) {
             FileWriter writer = new FileWriter(file);
             JsonArray strArr = new JsonArray();
-            strArr.add("tacz:glock_17|minecraft:apple|100");
-            strArr.add("tacz:cz75|minecraft:apple|100");
-            System.out.println("JSON CONFIG GEN = " + GSON.toJson(strArr));
+            strArr.add("tacz:glock_17|minecraft:apple|25");
+            strArr.add("tacz:cz75|minecraft:apple|25");
+            strArr.add("tacz:hk_mp5a5|minecraft:apple|25");
+            LOGGER.warn("JSON CONFIG GEN = " + GSON.toJson(strArr));
             writer.write(GSON.toJson(strArr));
             writer.close();
         }

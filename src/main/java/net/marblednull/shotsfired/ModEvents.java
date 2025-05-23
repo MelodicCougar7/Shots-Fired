@@ -1,5 +1,6 @@
 package net.marblednull.shotsfired;
 
+import com.google.gson.Gson;
 import com.mojang.logging.LogUtils;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -13,7 +14,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Objects;
 
 /// Main class to handle the casing creation event under weaponShootEvent()
 
@@ -24,9 +24,9 @@ public class ModEvents {
 
     // from corrine, config parser
     public static HashMap<String, DropData> parseConfig() {
-        if (JsonConfig.CONFIG_MAP.isEmpty()) {
+        if (TACZConfig.CONFIG_MAP.isEmpty()) {
             try {
-                JsonConfig.CONFIG_MAP = JsonConfig.readConfig();
+                TACZConfig.CONFIG_MAP = TACZConfig.readConfig();
             } catch (IOException e) {
                 LOGGER.error("IOException when parsing TACZ Config.");
                 throw new RuntimeException(e);
@@ -34,7 +34,7 @@ public class ModEvents {
         }
         // TEMPORARY LOGGING STATEMENT
         LOGGER.info("Success when parsing TACZ Config.");
-        return JsonConfig.CONFIG_MAP;
+        return TACZConfig.CONFIG_MAP;
     }
 
     public static HashMap<String, Integer> parseBurstConfig() {
@@ -66,15 +66,13 @@ public class ModEvents {
             // Check if the GunId exists in the map
             if (gunItemMap.containsKey(gunId)) {
                 // Get the item associated with the GunId
-                Item gunItem = gunItemMap.get(gunId).item;
+                Item casingItem = gunItemMap.get(gunId).item;
                 // create new itemstack from the retrieved GunId
-                ItemStack casingStack = new ItemStack(gunItem);
+                ItemStack casingStack = new ItemStack(casingItem);
                 // The chance the item will drop from the gun
                 float dropChance = gunItemMap.get(gunId).chance;
 
-                double shootingHeight = gunEvent.getShooter().getY() + gunEvent.getShooter().getEyeHeight() / 1.3;
-                // Offset the bullet spawning position, we don't want the bullet blocking player vision in first person
-                double offsetSize = 0.75f;
+                LOGGER.warn("Retrieving casing item for GunId: {}. Item is {}", gunId, casingItem);
 
                 int shotCount = 1; // default value. Is overridden by the burst config as necessary
 
@@ -84,74 +82,101 @@ public class ModEvents {
                         shotCount = gunBurstMap.getOrDefault(gunId, 1); // redundant but protects against incomplete configs
                     }
                         //burst fire mode spawning two casings, main difference between this and below code and will eventually swap for handler method once I learn how to properly create one
-                    for (int i = 0; i < shotCount; i++) {
-                        LOGGER.warn("Attempting shot.");
 
-                            //Create casing entity
+                    LOGGER.warn("Shot count is {}",shotCount);
 
-                            // Allow casing creation if this is true. This is a for loop, it will trigger on each passed shot, NOT groups, like burst.
-                            if (dropChance < randomBulletChance.nextFloat() * 100) {
-                                continue;
-                            }
-                               //Create casing entity with velocity
-
-                            Vec3 lookDirection = gunEvent.getShooter().getLookAngle();
-
-                            //CONFIGURABLE VALUES
-                                JsonEjectionConfig.EJECTION_MAP.get();
-
-                                LinkedHashMap<String, JsonEjectionConfig.EjectionInfo> ejectionConfigMap = JsonEjectionConfig.EJECTION_MAP.get();
-
-                                JsonEjectionConfig.EjectionInfo ejectionInfo = ejectionConfigMap.get(gunId);
-
-                                //define casing velocity/speed
-                                double velocity = ejectionInfo.casingVelocity();
-
-                                //define whether ejection is on right or not. Default value is true
-                                boolean isRight = ejectionInfo.isRight();
-
-                                //define side to side eject
-                                double rotationAngle = ejectionInfo.rotationAngle();
-
-                                // define arc of casing eject
-                                double verticalScalingFactor = ejectionInfo.verticalScalingFactor();
-
-                                //adjust y position of casing spawn, from player Eye Height
-                                double verticalOffset = ejectionInfo.verticalOffset();
-
-                                //define side offset to the left or right of the player
-                                double sideOffsetDistance = ejectionInfo.sideOffsetDistance();
-
-                                //NOT A CONFIG OPTION, USED IN CALCULATIONS
-                                double pitchAngle = gunEvent.getShooter().getXRot();
-
-                                // CALCULATIONS, NOT VARIABLES, NO NEED FOR CHANGE
-
-                                //DO NOT CHANGE - modify casing y position based on  player's eye height
-                                double offsetY = gunEvent.getShooter().getEyeHeight();
-                                //DO NOT CHANGE - add values of above 2
-                                double adjustedY = offsetY + verticalOffset;
-                                //DO NOT CHANGE - calculate spawn position based on isRight and sideOffsetDistance
-                                Vector3d sideOffset = calculateSideOffset(lookDirection, isRight, sideOffsetDistance);
-
-                                //Rotate 90 degrees from the look direction
-                                Vector3d offsetDirection = rotateDirection(lookDirection, rotationAngle, isRight, pitchAngle, verticalScalingFactor);
-
-                                //original casing entity creation below
-                                //ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY(), gunEvent.getShooter().getZ(), casingStack.copy());
-
-                                ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY() + adjustedY, gunEvent.getShooter().getZ(), casingStack.copy());
-
-                                casing.setDeltaMovement(offsetDirection.x * velocity, offsetDirection.y * velocity, offsetDirection.z * velocity);
-
-                                casing.setPickUpDelay(20);
-                                //Add casing
-                                gunEvent.getShooter().level().addFreshEntity(casing);
-                            
-  
-                        }
                     }
+                for (int i = 0; i < shotCount; i++) {
+                    LOGGER.warn("Attempting shot.");
+
+                    //Create casing entity
+
+                    // Allow casing creation if this is true. This is a for loop, it will trigger on each passed shot, NOT groups, like burst.
+                    // dropChance is thus the chance to NOT continue.
+                    if (dropChance < randomBulletChance.nextFloat() * 100) {
+                        continue;
+                    }
+                    //Create casing entity with velocity
+
+                    Vec3 lookDirection = gunEvent.getShooter().getLookAngle();
+
+                    //CONFIGURABLE VALUES
+
+                    LinkedHashMap<String, TACZEjectionConfig.EjectionInfo> ejectionConfigMap = TACZEjectionConfig.EJECTION_MAP.get();
+
+                    // Reformat ejectionInfo to fix some wierd issue with jsconf, I believe
+                    Object obj = ejectionConfigMap.get(gunId);
+                    TACZEjectionConfig.EjectionInfo ejectionInfo;
+
+                    if (obj instanceof TACZEjectionConfig.EjectionInfo ei) {
+                        ejectionInfo = ei;
+                    } else if (obj instanceof Map<?, ?> mapObj) {
+                        // Manually re-parse it using Gson to get proper EjectionInfo
+                        Gson gson = new Gson();
+                        ejectionInfo = gson.fromJson(gson.toJson(mapObj), TACZEjectionConfig.EjectionInfo.class);
+                        LOGGER.warn("Converted LinkedTreeMap to EjectionInfo for gunId '{}'", gunId);
+                    } else {
+                        // Fallback default
+                        LOGGER.warn("Invalid or missing ejection data for '{}', using default.", gunId);
+                        ejectionInfo = new TACZEjectionConfig.EjectionInfo(0.3, true, 90.0, 0.3, 0.1, 0.1);
+                    }
+                    //=====================================
+
+                    // random stuff from Quanz I haven't worked out yet
+
+                    double shootingHeight = gunEvent.getShooter().getY() + gunEvent.getShooter().getEyeHeight() / 1.3;
+                    // Offset the bullet spawning position, we don't want the bullet blocking player vision in first person
+                    double offsetSize = 0.75f;
+
+                    // ====================================
+
+                    //define casing velocity/speed
+                    double velocity = ejectionInfo.casingVelocity();
+
+                    //define whether ejection is on right or not. Default value is true
+                    boolean isRight = ejectionInfo.isRight();
+
+                    //define side to side eject
+                    double rotationAngle = ejectionInfo.rotationAngle();
+
+                    // define arc of casing eject
+                    double verticalScalingFactor = ejectionInfo.verticalScalingFactor();
+
+                    //adjust y position of casing spawn, from player Eye Height
+                    double verticalOffset = ejectionInfo.verticalOffset();
+
+                    //define side offset to the left or right of the player
+                    double sideOffsetDistance = ejectionInfo.sideOffsetDistance();
+
+                    //NOT A CONFIG OPTION, USED IN CALCULATIONS
+                    double pitchAngle = gunEvent.getShooter().getXRot();
+
+                    // CALCULATIONS, NOT VARIABLES, NO NEED FOR CHANGE
+
+                    //DO NOT CHANGE - modify casing y position based on  player's eye height
+                    double offsetY = gunEvent.getShooter().getEyeHeight();
+                    //DO NOT CHANGE - add values of above 2
+                    double adjustedY = offsetY + verticalOffset;
+                    //DO NOT CHANGE - calculate spawn position based on isRight and sideOffsetDistance
+                    Vector3d sideOffset = calculateSideOffset(lookDirection, isRight, sideOffsetDistance);
+
+                    //Rotate 90 degrees from the look direction
+                    Vector3d offsetDirection = rotateDirection(lookDirection, rotationAngle, isRight, pitchAngle, verticalScalingFactor);
+
+                    //original casing entity creation below
+                    //ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY(), gunEvent.getShooter().getZ(), casingStack.copy());
+
+                    ItemEntity casing = new ItemEntity(gunEvent.getShooter().level(), gunEvent.getShooter().getX(), gunEvent.getShooter().getY() + adjustedY, gunEvent.getShooter().getZ(), casingStack.copy());
+
+                    casing.setDeltaMovement(offsetDirection.x * velocity, offsetDirection.y * velocity, offsetDirection.z * velocity);
+
+                    casing.setPickUpDelay(20);
+                    //Add casing
+                    gunEvent.getShooter().level().addFreshEntity(casing);
+
+
                 }
+                } // end of gunItemMap and gunId check
             }
         }
 

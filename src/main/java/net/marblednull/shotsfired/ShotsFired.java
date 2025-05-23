@@ -29,10 +29,10 @@ public class ShotsFired {
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.addListener(ModEvents::weaponShootEvent);
         LOGGER.info("Passed by the register for weaponShootEvent");
-        JsonEjectionConfig.register();
+        TACZEjectionConfig.register();
         //Registering the JSON based Config
         try {
-            JsonConfig.checkConfig();
+            TACZConfig.checkConfig();
             JsonBurstConfig.checkConfig();
         } catch (IOException e) {
             throw new RuntimeException(e);
