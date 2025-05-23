@@ -86,6 +86,7 @@ public class ModEvents {
                     LOGGER.warn("Shot count is {}",shotCount);
 
                     }
+                // loop such that 1 passed shot count = one casing spawn attempt. Built for compatibility with burst shots under tacz's system.
                 for (int i = 0; i < shotCount; i++) {
                     LOGGER.warn("Attempting shot.");
 
@@ -94,7 +95,8 @@ public class ModEvents {
                     // Allow casing creation if this is true. This is a for loop, it will trigger on each passed shot, NOT groups, like burst.
                     // dropChance is thus the chance to NOT continue.
                     if (dropChance < randomBulletChance.nextFloat() * 100) {
-                        continue;
+                        LOGGER.warn("Casing broke! Ignoring further shot creation");
+                        continue; // make the
                     }
                     //Create casing entity with velocity
 

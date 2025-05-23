@@ -19,9 +19,9 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 
-/// Because we couldn't get the Forge Config to work for the life of us
+/// Jason Config (jsconf) based handling for Vic's Point Blank configs. Handles 1. PB item id, 2. casing item id, and 3. chance for the casing to break. Should only be loaded in the presence of Point Blank. Check ShotsFired.java for more details on conditional loading.
 
-public class TACZConfig {
+public class VPBConfig {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     public static final Path DIR = FMLPaths.CONFIGDIR.get();
@@ -30,22 +30,22 @@ public class TACZConfig {
     public static HashMap<String, DropData> CONFIG_MAP = new HashMap<>();
 
     public static HashMap<String, DropData> readConfig() throws IOException {
-        File file = DIR.resolve("shotsfired-tacz-config.json").toFile();
+        File file = DIR.resolve("shotsfired-vpb-config.json").toFile();
         if(file.exists()) {
             FileReader reader = new FileReader(file);
             List<String> stringList = GSON.fromJson(reader, List.class);
-            LOGGER.info("Attempting to make a new HashMap for String, DropData");
+            LOGGER.info("VPB Conf: Attempting to make a new HashMap for String, DropData");
             HashMap<String, DropData> map = new HashMap<>();
 
-            LOGGER.info("Creating new HashMap for String, DropData");
+            LOGGER.info("VPB Conf: Creating new HashMap for String, DropData");
 
             for (String strToParse : stringList) {
-                String gunId;
+                String gunItemId;
                 String itemId;
                 float itemChance = 100;
                 String[] strs = strToParse.split("\\|");
 
-                gunId = strs[0];
+                gunItemId = strs[0];
                 itemId = strs[1];
                 Item item = ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemId));
 
@@ -56,7 +56,7 @@ public class TACZConfig {
                     itemChance = Float.parseFloat(strs[2]);
                 }
 
-                map.put(gunId, new DropData(item, itemChance));
+                map.put(gunItemId, new DropData(item, itemChance));
             }
 
             return map;
@@ -67,15 +67,13 @@ public class TACZConfig {
     }
 
     public static void checkConfig() throws IOException {
-        LOGGER.info("Checking TACZ config."); // TEMPORARY LOGGING STATEMENT
-        File file = DIR.resolve("shotsfired-tacz-config.json").toFile();
+        LOGGER.info("Checking VPB config."); // TEMPORARY LOGGING STATEMENT
+        File file = DIR.resolve("shotsfired-vpb-config.json").toFile();
         if(!file.exists()) {
             FileWriter writer = new FileWriter(file);
             JsonArray strArr = new JsonArray();
             strArr.add("tacz:glock_17|minecraft:apple|25");
-            strArr.add("tacz:cz75|minecraft:apple|25");
-            strArr.add("tacz:hk_mp5a5|minecraft:apple|25");
-            LOGGER.warn("JSON CONFIG GEN = " + GSON.toJson(strArr));
+            LOGGER.warn("VPB: JSON CONFIG GEN = " + GSON.toJson(strArr));
             writer.write(GSON.toJson(strArr));
             writer.close();
         }
