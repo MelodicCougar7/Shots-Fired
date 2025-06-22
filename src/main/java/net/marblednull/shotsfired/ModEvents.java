@@ -51,7 +51,6 @@ public class ModEvents {
         return TACZBurstConfig.CONFIG_MAP;
     }
 
-
     //help from and credit to Leducklet/Corrineduck and ChatGPT smh
 
     public static void weaponShootEvent(com.tacz.guns.api.event.common.GunShootEvent gunEvent) {
@@ -185,7 +184,7 @@ public class ModEvents {
                         Thread.currentThread().interrupt();
                     }
                 }
-                } // end of gunItemMap and gunId check
+                } // end of gunItemMap,gunId check, and casing spawning
             }
         }
 

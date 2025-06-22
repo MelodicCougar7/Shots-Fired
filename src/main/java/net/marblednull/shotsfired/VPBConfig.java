@@ -34,10 +34,8 @@ public class VPBConfig {
         if(file.exists()) {
             FileReader reader = new FileReader(file);
             List<String> stringList = GSON.fromJson(reader, List.class);
-            LOGGER.info("VPB Conf: Attempting to make a new HashMap for String, DropData");
-            HashMap<String, DropData> map = new HashMap<>();
 
-            LOGGER.info("VPB Conf: Creating new HashMap for String, DropData");
+            HashMap<String, DropData> map = new HashMap<>();
 
             for (String strToParse : stringList) {
                 String gunItemId;
