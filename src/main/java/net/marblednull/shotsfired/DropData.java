@@ -1,11 +1,9 @@
 package net.marblednull.shotsfired;
 
-import net.minecraft.world.item.Item;
-
 public class DropData {
-    public Item item;
+    public String item; // cast to the minecraft item type in a class
     public float chance;
-    public DropData(Item item, float chance) {
+    public DropData(String item, float chance) {
         this.item = item;
         this.chance = chance;
     }

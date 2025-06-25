@@ -40,25 +40,24 @@ public class ShotsFired {
 
         if (TACZ_PRESENT) {
             //Registering the JSON based Config
-            TACZEjectionConfig.register();
-            try {
-                TACZConfig.checkConfig();
-                TACZBurstConfig.checkConfig();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
 
-        if (POINTBLANK_PRESENT) {
-            // Registering VPB's jsconf config
-            VPBEjectionConfig.register();
-            try {
-                VPBConfig.checkConfig();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            TACZConfig.init();
+            TACZBurstConfig.init();
+            TACZEjectionConfig.init();
+
 
         }
+///  Intentionally deprecated until PB support is added.
+//        if (POINTBLANK_PRESENT) {
+//            // Registering VPB's jsconf config
+//            VPBEjectionConfig.register();
+//            try {
+//                VPBConfig.checkConfig();
+//            } catch (IOException e) {
+//                throw new RuntimeException(e);
+//            }
+//
+//        }
     }
 
 
