@@ -13,8 +13,6 @@ public class TACZEjectionConfig {
 
     public record EjectionInfo(double velocity, boolean isRight, double rotationYawDeg, double rotationPitchDeg, double rotationRollDeg, double offsetX, double offsetY, double offsetZ){}
 
-    //public static final ConfigValue<EjectionInfo> EJECTION_VALUES = new ConfigValue<>(new EjectionInfo(1.0, true, 85.0, 1.0, -0.25, 0.15, 0.15, 0.15), "ejectionInfo", EJECTION_CONFIG);
-
     public static final ConfigValue<Map<String, EjectionInfo>> EJECTION_MAP = new ConfigValue<>(new LinkedHashMap<>(Map.of(
 
     "tacz:glock17", new EjectionInfo(1.0, true, 85.0, 1.0, -0.25, 0.15, 0.15, 0.15),

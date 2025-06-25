@@ -21,7 +21,7 @@ public class TACZBurstConfig {
 
             )), "TACZ Burst",
             TACZ_BURST_CONFIG,
-            new TypeToken<Map<String, TACZEjectionConfig.EjectionInfo>>(){}.getType()
+            new TypeToken<Map<String, BurstData>>(){}.getType()
             );
 
     public static void init() {
