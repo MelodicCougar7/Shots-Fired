@@ -77,7 +77,8 @@ public class ModEvents {
                 int shotCount = 1; // default value. Is overridden by the burst config as necessary
                 BurstData LocalBurstInfo = new BurstData(1, 0.15); // default value. Is overridden by the config as necessary.
 
-                if (gunEvent.getShooter().getMainHandItem().getTag().getString("GunFireMode").equals("BURST")) {
+                boolean isBurst = gunEvent.getShooter().getMainHandItem().getTag().getString("GunFireMode").equals("BURST");
+                if (isBurst) {
                     Map<String, BurstData> gunBurstMap = TACZBurstConfig.TACZ_BURST.get();
                     if (gunBurstMap.containsKey(gunId)) {
                         LocalBurstInfo = gunBurstMap.get(gunId); // redundant but protects against incomplete configs
@@ -163,10 +164,12 @@ public class ModEvents {
                     gunEvent.getShooter().level().addFreshEntity(casing);
 
                     // wait a specified amount of time
-                    try {
-                        Thread.sleep((long) (LocalBurstInfo.delay * 1000)); // Convert seconds to ms
-                    } catch (InterruptedException e) {
-                        Thread.currentThread().interrupt();
+                    if (isBurst) {
+                        try {
+                            Thread.sleep((long) (LocalBurstInfo.delay * 1000)); // Convert seconds to ms
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                        }
                     }
                 }
             } // end of gunItemMap,gunId check, and casing spawning
