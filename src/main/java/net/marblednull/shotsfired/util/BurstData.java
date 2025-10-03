@@ -1,4 +1,4 @@
-package net.marblednull.shotsfired;
+package net.marblednull.shotsfired.util;
 
 public class BurstData {
     public int shotCount;

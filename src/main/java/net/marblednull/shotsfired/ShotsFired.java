@@ -2,6 +2,9 @@ package net.marblednull.shotsfired;
 
 import com.mojang.logging.LogUtils;
 
+import net.marblednull.shotsfired.config.TACZBurstConfig;
+import net.marblednull.shotsfired.config.TACZConfig;
+import net.marblednull.shotsfired.config.TACZEjectionConfig;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerStartingEvent;
@@ -14,8 +17,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.slf4j.Logger;
-
-import java.io.IOException;
 
 @Mod(ShotsFired.MODID)
 public class ShotsFired {
@@ -45,7 +46,6 @@ public class ShotsFired {
             TACZBurstConfig.init();
             TACZEjectionConfig.init();
 
-
         }
 ///  Intentionally deprecated until PB support is added.
 //        if (POINTBLANK_PRESENT) {
@@ -59,7 +59,6 @@ public class ShotsFired {
 //
 //        }
     }
-
 
     private void commonSetup(final FMLCommonSetupEvent event) {
 

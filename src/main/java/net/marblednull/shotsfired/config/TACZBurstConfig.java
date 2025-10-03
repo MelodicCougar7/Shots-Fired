@@ -1,8 +1,9 @@
-package net.marblednull.shotsfired;
+package net.marblednull.shotsfired.config;
 
 import com.corrinedev.jsconf.api.Config;
 import com.corrinedev.jsconf.api.ConfigValue;
 import com.google.common.reflect.TypeToken;
+import net.marblednull.shotsfired.util.BurstData;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

@@ -4,8 +4,8 @@ license="Apache-2.0 License"
 
 [[mods]]
 modId="shotsfired"
-version="1.20.1-1.1.0"
-displayName="${mod_version}"
+version="${mod_version}"
+displayName="Shots Fired"
 displayURL="test1 / test2"
 logoFile="sf_logo.png"
 credits="MarbledNull, MelodicCougar7, Corrinedev"
@@ -46,5 +46,11 @@ description='''A mod that adds empty casings when you shoot a gun from TaCZ, and
     modId="tacz"
     mandatory=false
     versionRange="1.0.3,"
+    ordering="NONE"
+    side="BOTH"
+[[dependencies.shotsfired]]
+    modId="jsconf"
+    mandatory=true
+    versionRange="1.1.1"
     ordering="NONE"
     side="BOTH"

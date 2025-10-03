@@ -1,4 +1,4 @@
-package net.marblednull.shotsfired;
+package net.marblednull.shotsfired.util;
 
 public class DropData {
     public String item; // cast to the minecraft item type in a class
