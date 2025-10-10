@@ -8,6 +8,10 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
+// AI usage disclosure: In the interest of transparency, I inform the reader that this class was written with AI.
+// The general structure, function, and purpose of this class are mine, but the exact trig calcs are not.
+// I'm still learning higher level trigonometry and java syntax. If you see an obvious error, please make an issue and point it out.
+
 public class LaunchItemUtil {
 
     public static void spawnAndLaunchItem(Player player, double forwardDist, double rightDist, double upDist,

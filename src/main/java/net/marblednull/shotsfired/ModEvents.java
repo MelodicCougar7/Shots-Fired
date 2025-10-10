@@ -18,6 +18,9 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 
 import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static net.marblednull.shotsfired.util.LaunchItemUtil.spawnAndLaunchItem;
 
@@ -28,7 +31,49 @@ public class ModEvents {
 
     private static final RandomSource randomBulletChance = RandomSource.create();
 
+    private static final ScheduledExecutorService EXECUTOR = Executors.newScheduledThreadPool(1);
+
     //help from and credit to Leducklet/Corrineduck and ChatGPT smh
+
+    public static void spawnCasing(com.tacz.guns.api.event.common.GunShootEvent gunEvent, Item casingItem, double dropChance, String gunId) {
+        //Create casing entity
+
+        // Allow casing creation if this is true.
+        // dropChance is thus the chance to spawn a casing.
+        // 100 > 99.9, so continue
+        if (dropChance >= randomBulletChance.nextFloat() * 100) {
+            //LOGGER.warn("Casing broke! Ignoring further shot creation");
+
+
+            //Create casing entity with velocity
+
+            //=====================================
+
+            // random stuff from Quanz I haven't worked out yet. Will incorporate only if the ejection config system isn't enough
+
+            double shootingHeight = gunEvent.getShooter().getY() + gunEvent.getShooter().getEyeHeight() / 1.3;
+            // Offset the bullet spawning position, we don't want the bullet blocking player vision in first person
+            double offsetSize = 0.75f;
+
+            // ====================================
+
+            Map<String, TACZEjectionConfig.EjectionInfo> ejectionConfigMap = TACZEjectionConfig.EJECTION_MAP.get();
+            TACZEjectionConfig.EjectionInfo ejectionInfoByGun = ejectionConfigMap.get(gunId);
+
+            // stuff for the spawn and launch method
+            Player player = (Player) gunEvent.getShooter();
+            double forwardOffset = ejectionInfoByGun.offsetX();
+            double sideOffset = ejectionInfoByGun.offsetY();
+            double upOffset = ejectionInfoByGun.offsetZ();
+            double yawOffset = ejectionInfoByGun.rotationYawDeg();
+            double pitchOffset = ejectionInfoByGun.rotationPitchDeg();
+            double rollOffset = ejectionInfoByGun.rotationRollDeg();
+            double velocity = ejectionInfoByGun.velocity();
+
+
+            spawnAndLaunchItem(player, forwardOffset, sideOffset, upOffset, yawOffset, pitchOffset, rollOffset, velocity, casingItem);
+        }
+    }
 
     public static void weaponShootEvent(com.tacz.guns.api.event.common.GunShootEvent gunEvent) {
         // TEMPORARY LOGGING STATEMENTS COMMENTED OUT BUT LEFT FOR WHEN/IF I REFACTOR
@@ -66,53 +111,16 @@ public class ModEvents {
 
                 }
                 // loop such that 1 passed shot count = one casing spawn attempt. Built for compatibility with burst shots under tacz's system.
-                for (int i = 0; i < shotCount; i++) {
-                    LOGGER.warn("Attempting shot.");
 
-                    //Create casing entity
 
-                    // Allow casing creation if this is true. This is a for loop, it will trigger on each passed shot, NOT groups, like burst.
-                    // dropChance is thus the chance to NOT continue.
-                    if (dropChance < randomBulletChance.nextFloat() * 100) {
-                        //LOGGER.warn("Casing broke! Ignoring further shot creation");
-                        continue; // make the casing
+                    // Snippet created using generative AI
+                    for (int i = 0; i < shotCount; i++) {
+                        double delay = isBurst ? i * LocalBurstInfo.delay : 0;
+                        EXECUTOR.schedule(() -> spawnCasing(gunEvent, casingItem, dropChance, gunId),
+                                (long) (delay * 1000),
+                                TimeUnit.MILLISECONDS);
                     }
-                    //Create casing entity with velocity
 
-                    //=====================================
-
-                    // random stuff from Quanz I haven't worked out yet. Will incorporate only if the ejection config system isn't enough
-
-                    double shootingHeight = gunEvent.getShooter().getY() + gunEvent.getShooter().getEyeHeight() / 1.3;
-                    // Offset the bullet spawning position, we don't want the bullet blocking player vision in first person
-                    double offsetSize = 0.75f;
-
-                    // ====================================
-
-                    Map<String, TACZEjectionConfig.EjectionInfo> ejectionConfigMap = TACZEjectionConfig.EJECTION_MAP.get();
-                    TACZEjectionConfig.EjectionInfo ejectionInfoByGun = ejectionConfigMap.get(gunId);
-
-                    // stuff for the spawn and launch method
-                    Player player = (Player) gunEvent.getShooter();
-                    double forwardOffset = ejectionInfoByGun.offsetX();
-                    double sideOffset = ejectionInfoByGun.offsetY();
-                    double upOffset = ejectionInfoByGun.offsetZ();
-                    double yawOffset = ejectionInfoByGun.rotationYawDeg();
-                    double pitchOffset = ejectionInfoByGun.rotationPitchDeg();
-                    double rollOffset = ejectionInfoByGun.rotationRollDeg();
-                    double velocity = ejectionInfoByGun.velocity();
-
-                    spawnAndLaunchItem(player, forwardOffset, sideOffset, upOffset, yawOffset, pitchOffset, rollOffset, velocity, casingItem);
-
-                    // wait a specified amount of time
-                    if (isBurst) {
-                        try {
-                            Thread.sleep((long) (LocalBurstInfo.delay * 1000)); // Convert seconds to ms
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                        }
-                    }
-                }
             } // end of gunItemMap,gunId check, and casing spawning
         }
     }
