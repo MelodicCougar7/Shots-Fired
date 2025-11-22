@@ -112,13 +112,14 @@ public class ModEvents {
                 }
                 // loop such that 1 passed shot count = one casing spawn attempt. Built for compatibility with burst shots under tacz's system.
 
-
+                // code that causes a thread safety issue here
                     for (int i = 0; i < shotCount; i++) {
                         double delay = isBurst ? i * LocalBurstInfo.delay : 0;
                         EXECUTOR.schedule(() -> spawnCasing(gunEvent, casingItem, dropChance, gunId),
                                 (long) (delay * 1000),
                                 TimeUnit.MILLISECONDS);
                     }
+                // currently unsure how to proceed. Maybe a custom tick based executor but idk
 
             } // end of gunItemMap,gunId check, and casing spawning
         }
