@@ -42,7 +42,7 @@ public class LaunchItemUtil {
         Vec3 launchDir = rotateDirection(forward, right, up,
                 yawOffsetDeg, pitchOffsetDeg, rollOffsetDeg);
 
-        ItemStack casingStack = new ItemStack(casingItem); // Example item
+        ItemStack casingStack = new ItemStack(casingItem);
         ItemEntity casingEntity = new ItemEntity(level, spawnPos.x, spawnPos.y, spawnPos.z, casingStack);
 
         casingEntity.setDeltaMovement(launchDir.scale(speed));
