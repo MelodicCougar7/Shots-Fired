@@ -113,7 +113,6 @@ public class ModEvents {
                 // loop such that 1 passed shot count = one casing spawn attempt. Built for compatibility with burst shots under tacz's system.
 
 
-                    // Snippet created using generative AI
                     for (int i = 0; i < shotCount; i++) {
                         double delay = isBurst ? i * LocalBurstInfo.delay : 0;
                         EXECUTOR.schedule(() -> spawnCasing(gunEvent, casingItem, dropChance, gunId),
