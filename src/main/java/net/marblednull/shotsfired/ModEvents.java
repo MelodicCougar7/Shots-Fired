@@ -80,7 +80,6 @@ public class ModEvents {
 
             // Get the GunId from the event
             String gunId = gunEvent.getGunItemStack().getTag().getString("GunId");
-
             // Check if the GunId exists in the map
             if (gunItemMap.containsKey(gunId)) {
                 // Get the item associated with the GunId
