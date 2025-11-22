@@ -6,6 +6,7 @@ import net.marblednull.shotsfired.config.TACZConfig;
 import net.marblednull.shotsfired.config.TACZEjectionConfig;
 import net.marblednull.shotsfired.util.BurstData;
 import net.marblednull.shotsfired.util.DropData;
+import net.marblednull.shotsfired.util.LaunchItemUtil;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.RandomSource;
@@ -114,6 +115,7 @@ public class ModEvents {
                         (long) (delay * 1000),
                         TimeUnit.MILLISECONDS);
                     }
+                // currently unsure how to proceed. Maybe a custom tick based executor but idk
 
                 } else {
                 // ignore the executor service as it is not needed
