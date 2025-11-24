@@ -40,10 +40,10 @@ public class ShotsFired {
         MinecraftForge.EVENT_BUS.addListener(ModEvents::weaponShootEvent);
 
         if (TACZ_PRESENT) {
-            //Registering the JSON based Config
+            //Registering tacz config
 
             TACZConfig.init();
-            TACZBurstConfig.init();
+            // TACZBurstConfig.init(); DEPRECATED
             TACZEjectionConfig.init();
 
         }

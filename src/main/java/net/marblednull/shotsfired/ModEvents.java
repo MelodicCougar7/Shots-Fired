@@ -1,14 +1,10 @@
 package net.marblednull.shotsfired;
 
 import com.mojang.logging.LogUtils;
-import net.marblednull.shotsfired.config.TACZBurstConfig;
 import net.marblednull.shotsfired.config.TACZConfig;
 import net.marblednull.shotsfired.config.TACZEjectionConfig;
-import net.marblednull.shotsfired.util.BurstData;
 import net.marblednull.shotsfired.util.DropData;
-import net.marblednull.shotsfired.util.LaunchItemUtil;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -16,18 +12,12 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.slf4j.Logger;
 
 import java.util.Map;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import static net.marblednull.shotsfired.util.LaunchItemUtil.spawnAndLaunchItem;
 
-// Test class to handle the casing creation event under weaponShootEvent()
-
 public class ModEvents {
+    ///  Main class that handles the casing firing sequence and casing creation, while item physics are gotten from a util.
     private static final Logger LOGGER = LogUtils.getLogger();
-
-    private static final ScheduledExecutorService EXECUTOR = Executors.newScheduledThreadPool(1);
 
     private static final RandomSource randomBulletChance = RandomSource.create();
 
@@ -43,16 +33,6 @@ public class ModEvents {
             //LOGGER.warn("Casing broke! Ignoring further shot creation");
 
             //Create casing entity with velocity
-
-            //=====================================
-
-            // random stuff from Quanz I haven't worked out yet. Will incorporate only if the ejection config system isn't enough
-
-            // double shootingHeight = gunEvent.getShooter().getY() + gunEvent.getShooter().getEyeHeight() / 1.3;
-            // Offset the bullet spawning position, we don't want the bullet blocking player vision in first person
-            // double offsetSize = 0.75f;
-
-            // ====================================
 
             Map<String, TACZEjectionConfig.EjectionInfo> ejectionConfigMap = TACZEjectionConfig.EJECTION_MAP.get();
             TACZEjectionConfig.EjectionInfo ejectionInfoByGun;
@@ -78,10 +58,9 @@ public class ModEvents {
 
     public static void weaponShootEvent(com.tacz.guns.api.event.common.GunFireEvent gunEvent) {
         // TEMPORARY LOGGING STATEMENTS COMMENTED OUT BUT LEFT FOR WHEN/IF I REFACTOR
-        LOGGER.warn("weaponShootEvent called");
         if (gunEvent.getLogicalSide().isServer()) {
+           // LOGGER.warn("weaponShootEvent called");
             Map<String, DropData> gunItemMap = TACZConfig.TACZ.get();
-
             // Get the GunId from the event
             String gunId = gunEvent.getGunItemStack().getTag().getString("GunId");
             // Check if the GunId exists in the map
@@ -91,39 +70,7 @@ public class ModEvents {
                 // create new itemstack from the retrieved GunId
                 // The chance the item will drop from the gun
                 float dropChance = gunItemMap.get(gunId).chance;
-
-                //LOGGER.warn("Retrieving casing item for GunId: {}. Item is {}", gunId, casingItem);
-
-                //int shotCount = 1; // default value. Is overridden by the burst config as necessary
-                //BurstData LocalBurstInfo = new BurstData(1, 0.15); // default value. Is overridden by the config as necessary.
-
-    //            boolean isBurst = gunEvent.getShooter().getMainHandItem().getTag().getString("GunFireMode").equals("BURST");
-    //            if (isBurst) {
-    //                Map<String, BurstData> gunBurstMap = TACZBurstConfig.TACZ_BURST.get();
-    //                if (gunBurstMap.containsKey(gunId)) {
-    //                    LocalBurstInfo = gunBurstMap.get(gunId); // redundant but protects against incomplete configs
-    //                    shotCount = LocalBurstInfo.shotCount;
-    //                }
-                    //burst fire mode spawning two casings, main difference between this and below code and will eventually swap for handler method once I learn how to properly create one
-
-                    //LOGGER.warn("Shot count is {}", shotCount);
-
-  //                  for (int i = 0; i < shotCount; i++) {
-  //                      double delay = isBurst ? i * LocalBurstInfo.delay : 0;
-  //                      EXECUTOR.schedule(() -> {
-  //                          MinecraftServer server = gunEvent.getShooter().level().getServer();
-  //                          if (server == null) return;
-  //                          server.execute(() -> spawnCasing(gunEvent, casingItem, dropChance, gunId));
-  //                      },
-  //                      (long) (delay * 1000),
-  //                      TimeUnit.MILLISECONDS);
-  //                 }
-                // currently unsure how to proceed. Maybe a custom tick based executor but idk
-
-  //              } else {
-                // ignore the executor service as it is not needed
                     spawnCasing(gunEvent, casingItem, dropChance, gunId);
-   //             }
 
             } // end of gunItemMap,gunId check, and casing spawning
         }
