@@ -55,7 +55,12 @@ public class ModEvents {
             // ====================================
 
             Map<String, TACZEjectionConfig.EjectionInfo> ejectionConfigMap = TACZEjectionConfig.EJECTION_MAP.get();
-            TACZEjectionConfig.EjectionInfo ejectionInfoByGun = ejectionConfigMap.get(gunId);
+            TACZEjectionConfig.EjectionInfo ejectionInfoByGun;
+            if (ejectionConfigMap.containsKey(gunId)) {
+                ejectionInfoByGun = ejectionConfigMap.get(gunId);
+            } else {
+               ejectionInfoByGun = ejectionConfigMap.get("fallback");
+            }
 
             // stuff for the spawn and launch method
             Player player = (Player) gunEvent.getShooter();
@@ -67,14 +72,13 @@ public class ModEvents {
             double rollOffset = ejectionInfoByGun.rotationRollDeg();
             double velocity = ejectionInfoByGun.velocity();
 
-
             spawnAndLaunchItem(player, forwardOffset, sideOffset, upOffset, yawOffset, pitchOffset, rollOffset, velocity, casingItem);
         }
     }
 
     public static void weaponShootEvent(com.tacz.guns.api.event.common.GunFireEvent gunEvent) {
         // TEMPORARY LOGGING STATEMENTS COMMENTED OUT BUT LEFT FOR WHEN/IF I REFACTOR
-        //LOGGER.warn("weaponShootEvent called");
+        LOGGER.warn("weaponShootEvent called");
         if (gunEvent.getLogicalSide().isServer()) {
             Map<String, DropData> gunItemMap = TACZConfig.TACZ.get();
 
@@ -90,36 +94,36 @@ public class ModEvents {
 
                 //LOGGER.warn("Retrieving casing item for GunId: {}. Item is {}", gunId, casingItem);
 
-                int shotCount = 1; // default value. Is overridden by the burst config as necessary
-                BurstData LocalBurstInfo = new BurstData(1, 0.15); // default value. Is overridden by the config as necessary.
+                //int shotCount = 1; // default value. Is overridden by the burst config as necessary
+                //BurstData LocalBurstInfo = new BurstData(1, 0.15); // default value. Is overridden by the config as necessary.
 
-                boolean isBurst = gunEvent.getShooter().getMainHandItem().getTag().getString("GunFireMode").equals("BURST");
-                if (isBurst) {
-                    Map<String, BurstData> gunBurstMap = TACZBurstConfig.TACZ_BURST.get();
-                    if (gunBurstMap.containsKey(gunId)) {
-                        LocalBurstInfo = gunBurstMap.get(gunId); // redundant but protects against incomplete configs
-                        shotCount = LocalBurstInfo.shotCount;
-                    }
+    //            boolean isBurst = gunEvent.getShooter().getMainHandItem().getTag().getString("GunFireMode").equals("BURST");
+    //            if (isBurst) {
+    //                Map<String, BurstData> gunBurstMap = TACZBurstConfig.TACZ_BURST.get();
+    //                if (gunBurstMap.containsKey(gunId)) {
+    //                    LocalBurstInfo = gunBurstMap.get(gunId); // redundant but protects against incomplete configs
+    //                    shotCount = LocalBurstInfo.shotCount;
+    //                }
                     //burst fire mode spawning two casings, main difference between this and below code and will eventually swap for handler method once I learn how to properly create one
 
                     //LOGGER.warn("Shot count is {}", shotCount);
 
-                    for (int i = 0; i < shotCount; i++) {
-                        double delay = isBurst ? i * LocalBurstInfo.delay : 0;
-                        EXECUTOR.schedule(() -> {
-                            MinecraftServer server = gunEvent.getShooter().level().getServer();
-                            if (server == null) return;
-                            server.execute(() -> spawnCasing(gunEvent, casingItem, dropChance, gunId));
-                        },
-                        (long) (delay * 1000),
-                        TimeUnit.MILLISECONDS);
-                    }
+  //                  for (int i = 0; i < shotCount; i++) {
+  //                      double delay = isBurst ? i * LocalBurstInfo.delay : 0;
+  //                      EXECUTOR.schedule(() -> {
+  //                          MinecraftServer server = gunEvent.getShooter().level().getServer();
+  //                          if (server == null) return;
+  //                          server.execute(() -> spawnCasing(gunEvent, casingItem, dropChance, gunId));
+  //                      },
+  //                      (long) (delay * 1000),
+  //                      TimeUnit.MILLISECONDS);
+  //                 }
                 // currently unsure how to proceed. Maybe a custom tick based executor but idk
 
-                } else {
+  //              } else {
                 // ignore the executor service as it is not needed
                     spawnCasing(gunEvent, casingItem, dropChance, gunId);
-                }
+   //             }
 
             } // end of gunItemMap,gunId check, and casing spawning
         }

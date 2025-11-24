@@ -15,6 +15,7 @@ public class TACZEjectionConfig {
 
     public static final ConfigValue<Map<String, EjectionInfo>> EJECTION_MAP = new ConfigValue<>(new LinkedHashMap<>(Map.of(
 
+    "fallback", new EjectionInfo(1.0, true, 85.0, 1.0, -0.25, 0.15, 0.15, 0.15),
     "tacz:glock17", new EjectionInfo(1.0, true, 85.0, 1.0, -0.25, 0.15, 0.15, 0.15),
     "tacz:hk_mp5a5", new EjectionInfo(0.4, true, 85.0, -45.0, -25.0, 0.55, -0.2, 0.11)
 
