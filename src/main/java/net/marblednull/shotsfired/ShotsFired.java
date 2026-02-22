@@ -2,7 +2,6 @@ package net.marblednull.shotsfired;
 
 import com.mojang.logging.LogUtils;
 
-import net.marblednull.shotsfired.config.TACZBurstConfig;
 import net.marblednull.shotsfired.config.TACZConfig;
 import net.marblednull.shotsfired.config.TACZEjectionConfig;
 import net.minecraftforge.api.distmarker.Dist;

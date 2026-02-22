@@ -25,6 +25,7 @@ public class ModEvents {
 
     public static void spawnCasing(com.tacz.guns.api.event.common.GunFireEvent gunEvent, Item casingItem, double dropChance, String gunId) {
         //Create casing entity
+        if (!(gunEvent.getShooter() instanceof Player)) return;
 
         // Allow casing creation if this is true.
         // dropChance is thus the chance to spawn a casing.
@@ -59,7 +60,8 @@ public class ModEvents {
     public static void weaponShootEvent(com.tacz.guns.api.event.common.GunFireEvent gunEvent) {
         // TEMPORARY LOGGING STATEMENTS COMMENTED OUT BUT LEFT FOR WHEN/IF I REFACTOR
         if (gunEvent.getLogicalSide().isServer()) {
-           // LOGGER.warn("weaponShootEvent called");
+            if (!(gunEvent.getShooter() instanceof Player)) return;
+            // LOGGER.warn("weaponShootEvent called");
             Map<String, DropData> gunItemMap = TACZConfig.TACZ.get();
             // Get the GunId from the event
             String gunId = gunEvent.getGunItemStack().getTag().getString("GunId");
