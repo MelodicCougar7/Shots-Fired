@@ -2,7 +2,8 @@ package net.marblednull.shotsfired;
 
 import com.mojang.logging.LogUtils;
 
-import net.marblednull.shotsfired.config.TACZBurstConfig;
+import net.marblednull.shotsfired.config.EntityBlacklist;
+//import net.marblednull.shotsfired.config.TACZBurstConfig;
 import net.marblednull.shotsfired.config.TACZConfig;
 import net.marblednull.shotsfired.config.TACZEjectionConfig;
 import net.minecraftforge.api.distmarker.Dist;
@@ -38,6 +39,7 @@ public class ShotsFired {
         MinecraftForge.EVENT_BUS.register(this);
         // currently planned to use universally for all supported mods
         MinecraftForge.EVENT_BUS.addListener(ModEvents::weaponShootEvent);
+        EntityBlacklist.init();
 
         if (TACZ_PRESENT) {
             //Registering tacz config

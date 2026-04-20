@@ -1,9 +1,11 @@
 package net.marblednull.shotsfired;
 
 import com.mojang.logging.LogUtils;
+import net.marblednull.shotsfired.config.EntityBlacklist;
 import net.marblednull.shotsfired.config.TACZConfig;
 import net.marblednull.shotsfired.config.TACZEjectionConfig;
 import net.marblednull.shotsfired.util.DropData;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
@@ -39,7 +41,7 @@ public class ModEvents {
             if (ejectionConfigMap.containsKey(gunId)) {
                 ejectionInfoByGun = ejectionConfigMap.get(gunId);
             } else {
-               ejectionInfoByGun = ejectionConfigMap.get("fallback");
+                ejectionInfoByGun = ejectionConfigMap.get("fallback");
             }
 
             // stuff for the spawn and launch method
@@ -57,9 +59,15 @@ public class ModEvents {
     }
 
     public static void weaponShootEvent(com.tacz.guns.api.event.common.GunFireEvent gunEvent) {
-        // TEMPORARY LOGGING STATEMENTS COMMENTED OUT BUT LEFT FOR WHEN/IF I REFACTOR
         if (gunEvent.getLogicalSide().isServer()) {
-           // LOGGER.warn("weaponShootEvent called");
+            // return early if the shooter is in the blacklist
+            for (String entityIdString : EntityBlacklist.BLACKLIST.get()) {
+                if (gunEvent.getShooter().getType() == ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(entityIdString))) {
+                    return;
+                }
+            }
+
+            // LOGGER.warn("weaponShootEvent called");
             Map<String, DropData> gunItemMap = TACZConfig.TACZ.get();
             // Get the GunId from the event
             String gunId = gunEvent.getGunItemStack().getTag().getString("GunId");
@@ -70,9 +78,10 @@ public class ModEvents {
                 // create new itemstack from the retrieved GunId
                 // The chance the item will drop from the gun
                 float dropChance = gunItemMap.get(gunId).chance;
-                    spawnCasing(gunEvent, casingItem, dropChance, gunId);
+                spawnCasing(gunEvent, casingItem, dropChance, gunId);
 
-            } // end of gunItemMap,gunId check, and casing spawning
+            }
+            // end of gunItemMap,gunId check, and casing spawning
         }
     }
 }

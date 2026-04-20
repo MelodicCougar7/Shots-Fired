@@ -39,7 +39,7 @@ description='''A mod that adds empty casings when you shoot a gun from TaCZ, and
 [[dependencies.shotsfired]]
     modId="pointblank"
     mandatory=false
-    versionRange="[1.7.6,]"
+    versionRange="[1.6.7,]"
     ordering="NONE"
     side="BOTH"
 [[dependencies.shotsfired]]
