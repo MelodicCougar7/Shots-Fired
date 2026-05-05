@@ -6,6 +6,7 @@ import net.marblednull.shotsfired.config.EntityBlacklist;
 //import net.marblednull.shotsfired.config.TACZBurstConfig;
 import net.marblednull.shotsfired.config.TACZConfig;
 import net.marblednull.shotsfired.config.TACZEjectionConfig;
+import net.marblednull.shotsfired.config.TACZReloadConfig;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.server.ServerStartingEvent;
@@ -38,7 +39,8 @@ public class ShotsFired {
         modEventBus.addListener(this::commonSetup);
         MinecraftForge.EVENT_BUS.register(this);
         // currently planned to use universally for all supported mods
-        MinecraftForge.EVENT_BUS.addListener(ModEvents::weaponShootEvent);
+        MinecraftForge.EVENT_BUS.addListener(ModEvents::weaponFireEvent);
+        MinecraftForge.EVENT_BUS.addListener(ModEvents::weaponReloadEvent);
         EntityBlacklist.init();
 
         if (TACZ_PRESENT) {
@@ -47,6 +49,7 @@ public class ShotsFired {
             TACZConfig.init();
             // TACZBurstConfig.init(); DEPRECATED
             TACZEjectionConfig.init();
+            TACZReloadConfig.init();
 
         }
 ///  Intentionally deprecated until PB support is added.

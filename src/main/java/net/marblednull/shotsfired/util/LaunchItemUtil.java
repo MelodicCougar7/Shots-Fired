@@ -1,5 +1,6 @@
 package net.marblednull.shotsfired.util;
 
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
@@ -14,7 +15,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class LaunchItemUtil {
 
-    public static void spawnAndLaunchItem(Player player, double forwardDist, double rightDist, double upDist,
+    public static void spawnAndLaunchItem(LivingEntity player, double forwardDist, double rightDist, double upDist,
                                           double yawOffsetDeg, double pitchOffsetDeg, double rollOffsetDeg,
                                           double speed, Item casingItem) {
         Level level = player.level();
